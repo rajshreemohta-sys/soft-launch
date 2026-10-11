@@ -119,6 +119,8 @@ account score = sum of signal values from the last ${LOOKBACK_DAYS} days
             <li>Google News RSS returns a limited, slightly varying set of results, so an event can be missed one day and caught the next.</li>
             <li>The Ken is read through its public headlines only; paywalled articles are never fetched.</li>
             <li>Gemini can misjudge an article, so every signal links to its source.</li>
+            <li>Google closed Gemini 2.5 Flash to new API keys, so the app runs on Gemini 3.8 Flash (set by one environment variable).</li>
+            <li>Vercel&rsquo;s free plan runs scheduled jobs within the hour, and one run can check about 25 accounts in its time limit, so a second morning run finishes the rest.</li>
           </ul>
           <p className="small muted">{SITE.disclaimer}</p>
         </div>
