@@ -161,7 +161,21 @@ Enable RLS on all tables. The dashboard reads through server-side code only.
 
 ### Seed data
 
-Create `seed/accounts.json` with 40 real Indian companies that have large workforces and regular news coverage, spread across quick commerce, logistics, hospitals, retail chains, hotels, BPO/IT services and manufacturing. Avoid names that are ambiguous in news search. For each, fill Arjun's columns with realistic made-up data: a deal stage (mix of all four), a 1–2 sentence note, a last contact date in the past 60 days, and a short relationship read (e.g. "Warm, HR head is a champion, CFO sceptical on cost"). **Show me the list before seeding.** `TODO(Rajshree)`: approve the 40 companies.
+**Done (Phase 2).** Rajshree supplied and approved the 40 companies (mix of enterprises where a trigger opens a vendor-replacement chance, and fast-scaling mid-market companies where Arjun could be the first proper system). Source of truth: `seed/accounts.json`; `node seed/build-seed-sql.mjs` regenerates `seed/seed.sql`. Sector = Rajshree's group headings. Search-term rules: "India" added for Teleperformance, Concentrix, Startek; Porter is never searched as just "Porter". Arjun's data refers to roles, never real people's names.
+
+After Phase 3, report any company that returns very little news so Rajshree can swap it.
+
+### Disclaimer (required)
+
+Show this exact line, small and clear, in the dashboard footer, on `/how-it-works`, at the bottom of the Hot List email, and in the README:
+
+> Demo project. Companies and news are real; Arjun, his product and all deal notes are fictional.
+
+(Context: Mesa School of Business exam project.)
+
+### Supabase project
+
+Project `soft-launch`, ref `zuhslwritiysejjyrqhj`, region ap-south-1 (Mumbai). Schema in `supabase/migrations/001_init.sql`. The single RPC above was split into `update_account_signals` (collect: score + latest signal + last_checked_at), `clear_hot_list` and `set_hot_list_entry` (hot_rank + outreach_angle), so daily collects never wipe the Hot List. `service_role` has no direct INSERT/UPDATE/DELETE on `accounts`.
 
 ## 6. Trigger taxonomy
 
@@ -382,7 +396,6 @@ Provide `.env.example` with these names and no values. Make sure `.env.local` is
 ## 17. Open decisions
 
 - `TODO(Rajshree)`: product name and dashboard name
-- `TODO(Rajshree)`: approve the 40 companies
 - `TODO(Rajshree)`: Hot List rule when fewer than 10 accounts are eligible (default in section 7)
 - `TODO(Rajshree)`: Gemini Flash model version
 - `TODO(Rajshree)`: replace the Hot List headline "Who's worth a call this week" (Rajshree dislikes it, wants a less cringe one). Remind her at the Phase 6 dashboard checkpoint at the latest.

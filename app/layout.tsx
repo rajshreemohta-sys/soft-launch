@@ -17,7 +17,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} ${interTight.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <footer className="site-footer">
+          Demo project. Companies and news are real; Arjun, his product and all
+          deal notes are fictional.
+        </footer>
+      </body>
     </html>
   );
 }
