@@ -4,50 +4,29 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Job = "collect" | "hotlist";
-const STORAGE_KEY = "run-passcode";
 
-function readPasscode(): string {
-  try {
-    return sessionStorage.getItem(STORAGE_KEY) ?? "";
-  } catch {
-    return "";
-  }
-}
-
-function savePasscode(value: string | null) {
-  try {
-    if (value) sessionStorage.setItem(STORAGE_KEY, value);
-    else sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* storage unavailable: the passcode is simply asked again next time */
-  }
-}
-
-// "Run collection now" and "Send Hot List now", protected by RUN_PASSCODE.
+// "Run collection now" and "Send Hot List now". Public; the server rate-limits them.
 export function RunControls() {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const [job, setJob] = useState<Job>("collect");
-  const [passcode, setPasscode] = useState("");
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const [done, setDone] = useState(false);
 
   const open = (j: Job) => {
     setJob(j);
-    setPasscode(readPasscode());
     setStatus("");
     setDone(false);
     dialog.current?.showModal();
   };
 
-  const call = async (path: string, code: string, body?: object) => {
+  const call = async (path: string, body?: object) => {
     const res = await fetch(path, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-run-passcode": code },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body ?? {}),
     });
-    if (res.status === 401) throw new Error("Wrong passcode.");
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error ?? `The server returned ${res.status}.`);
     return data;
@@ -55,7 +34,6 @@ export function RunControls() {
 
   const run = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!passcode) return;
     setBusy(true);
     setDone(false);
     try {
@@ -65,8 +43,7 @@ export function RunControls() {
         let found = 0;
         setStatus("Checking the news for every account…");
         for (let round = 0; round < 20; round++) {
-          const r = await call("/api/run/collect", passcode, { startedAt });
-          savePasscode(passcode);
+          const r = await call("/api/run/collect", { startedAt });
           checked += r.processed;
           found += r.signalsFound;
           setStatus(`Checked ${checked} accounts, ${r.remaining} to go. ${found} new signals so far…`);
@@ -75,8 +52,7 @@ export function RunControls() {
         setStatus(`Done. Checked ${checked} accounts and found ${found} new signals. Scores are updated.`);
       } else {
         setStatus("Building the Hot List. This takes about a minute…");
-        const r = await call("/api/run/hotlist", passcode);
-        savePasscode(passcode);
+        const r = await call("/api/run/hotlist");
         setStatus(
           r.dryRun
             ? `Built "${r.subject}" as a dry run. It was not emailed; see Email preview.`
@@ -88,9 +64,7 @@ export function RunControls() {
       setDone(true);
       router.refresh();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Something went wrong.";
-      if (message === "Wrong passcode.") savePasscode(null);
-      setStatus(message);
+      setStatus(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setBusy(false);
     }
@@ -117,25 +91,13 @@ export function RunControls() {
               ? "Fetches today’s news for all 40 accounts, classifies it with Gemini Flash and rescores every account. About 4 minutes."
               : "Builds the top 10 with fresh outreach angles and emails it to Arjun, unless dry-run mode is on."}
           </p>
-          <label className="field">
-            Passcode
-            <input
-              type="password"
-              autoComplete="off"
-              value={passcode}
-              onChange={(e) => setPasscode(e.target.value)}
-              disabled={busy}
-              required
-              autoFocus
-            />
-          </label>
           <p className="run-status" aria-live="polite">{status}</p>
           <div className="run-actions">
             <button type="button" className="btn btn-ghost" onClick={() => dialog.current?.close()} disabled={busy}>
               {done ? "Close" : "Cancel"}
             </button>
             {!done && (
-              <button type="submit" className={`btn ${job === "hotlist" ? "btn-primary" : ""}`} disabled={busy || !passcode}>
+              <button type="submit" className={`btn ${job === "hotlist" ? "btn-primary" : ""}`} disabled={busy} autoFocus>
                 {busy ? "Running…" : job === "collect" ? "Run collection" : "Send Hot List"}
               </button>
             )}

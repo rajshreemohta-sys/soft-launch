@@ -14,11 +14,4 @@ export function isCronRequest(request: Request): boolean {
   return !!secret && safeEqual(header, `Bearer ${secret}`);
 }
 
-// Dashboard buttons send the passcode in a header.
-export function hasRunPasscode(request: Request): boolean {
-  const passcode = process.env.RUN_PASSCODE;
-  const given = request.headers.get("x-run-passcode") ?? "";
-  return !!passcode && safeEqual(given, passcode);
-}
-
 export const unauthorized = () => Response.json({ error: "Not authorised" }, { status: 401 });
