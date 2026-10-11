@@ -385,4 +385,5 @@ Provide `.env.example` with these names and no values. Make sure `.env.local` is
 - `TODO(Rajshree)`: approve the 40 companies
 - `TODO(Rajshree)`: Hot List rule when fewer than 10 accounts are eligible (default in section 7)
 - `TODO(Rajshree)`: Gemini Flash model version
+- `TODO(Rajshree)`: replace the Hot List headline "Who's worth a call this week" (Rajshree dislikes it, wants a less cringe one). Remind her at the Phase 6 dashboard checkpoint at the latest.
 - Known edge: with a strict 3-day window, news published Thursday after the morning email but before Friday morning is more than 3 days old by Monday's email, so it counts in the score but can't make Monday's Hot List. Keep `HOT_LIST_WINDOW_DAYS` configurable; changing it to 4 closes the gap but stretches the brief's wording.
