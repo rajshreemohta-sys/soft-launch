@@ -360,7 +360,7 @@ Optional, only after everything else works: let Arjun edit his own fields from t
 NEXT_PUBLIC_SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 GEMINI_API_KEY=
-GEMINI_MODEL=              # TODO(Rajshree): the Gemini Flash version my faculty specified
+GEMINI_MODEL=              # gemini-3.8-flash (2.5 Flash is closed to new keys)
 RESEND_API_KEY=
 HOTLIST_TO_EMAIL=          # must be my Resend account email on the free tier
 CRON_SECRET=
@@ -398,6 +398,14 @@ Provide `.env.example` with these names and no values. Make sure `.env.local` is
 
 - `TODO(Rajshree)`: product name and dashboard name
 - `TODO(Rajshree)`: Hot List rule when fewer than 10 accounts are eligible (default in section 7)
-- `TODO(Rajshree)`: Gemini Flash model version
+- ~~Gemini Flash model version~~ **Decided: `gemini-3.8-flash`.** Rajshree's key cannot use `gemini-2.5-flash` (Google: "no longer available to new users"). Mention this in the README.
 - `TODO(Rajshree)`: replace the Hot List headline "Who's worth a call this week" (Rajshree dislikes it, wants a less cringe one). Remind her at the Phase 6 dashboard checkpoint at the latest.
 - Known edge: with a strict 3-day window, news published Thursday after the morning email but before Friday morning is more than 3 days old by Monday's email, so it counts in the score but can't make Monday's Hot List. Keep `HOT_LIST_WINDOW_DAYS` configurable; changing it to 4 closes the gap but stretches the brief's wording.
+
+## 18. Build log and deviations (keep updated)
+
+- **Migration 002:** `seen_articles` primary key is `(account_id, url)` and `signals` is unique on `(account_id, source_url)`, because one article can be relevant to two accounts (e.g. "Blinkit beats Zepto").
+- **Collect pipeline** lives in `lib/collect.ts`; run locally with `npm run collect` (all) or `npm run collect -- Zepto DMart`. At most 40 newest unseen articles per company per Gemini call; the rest are picked up next run.
+- **Prompt A additions:** routine same-kind announcements (several hotel signings or store openings) are grouped into one event; future signings and non-India activity score lower; generic IT/cloud upgrades are not workforce_digitalisation; regulatory/product problems not about staff are not operational_challenge.
+- **Gemini config:** JSON mode with `responseJsonSchema`, temperature 0.2, thinking level LOW, 4 s between calls, retries 429/5xx with backoff.
+- **Known limitation:** Google News RSS returns a limited, slightly varying set per query, so an event can be missed on one run and caught on the next.
