@@ -161,7 +161,7 @@ Enable RLS on all tables. The dashboard reads through server-side code only.
 
 ### Seed data
 
-**Done (Phase 2).** Rajshree supplied and approved the 40 companies (mix of enterprises where a trigger opens a vendor-replacement chance, and fast-scaling mid-market companies where Arjun could be the first proper system). Source of truth: `seed/accounts.json`; `node seed/build-seed-sql.mjs` regenerates `seed/seed.sql`. Sector = Rajshree's group headings. Search-term rules: "India" added for Teleperformance, Concentrix, Startek; Porter is never searched as just "Porter". Arjun's data refers to roles, never real people's names.
+**Done (Phase 2).** Rajshree supplied and approved the 40 companies (mix of enterprises where a trigger opens a vendor-replacement chance, and fast-scaling mid-market companies where Arjun could be the first proper system). Source of truth: `seed/accounts.json`; `node seed/build-seed-sql.mjs` regenerates `seed/seed.sql`. Sector = Rajshree's group headings. Search-term rules: "India" added for Teleperformance, Concentrix, Startek; Porter is searched as `"Porter" logistics` (never just "Porter"). Swapped after Phase 3 for thin news: Startek India → Fusion CX (outreach), Pristyn Care → Medanta (in conversation). Arjun's data refers to roles, never real people's names.
 
 After Phase 3, report any company that returns very little news so Rajshree can swap it.
 
