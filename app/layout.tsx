@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Inter_Tight } from "next/font/google";
+import { Header } from "@/components/Header";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -10,19 +12,24 @@ const interTight = Inter_Tight({
 });
 
 export const metadata: Metadata = {
-  title: "Signal Desk",
-  description: "Account signal monitor: which accounts are worth a call this week.",
+  title: { default: SITE.name, template: `%s · ${SITE.name}` },
+  description: "Watches live news for 40 accounts and ranks who is worth a call this week.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} ${interTight.variable}`}>
       <body>
-        {children}
-        <footer className="site-footer">
-          Demo project. Companies and news are real; Arjun, his product and all
-          deal notes are fictional.
-        </footer>
+        <div className="shell">
+          <Header />
+          <div className="rule" />
+          <main>{children}</main>
+          <div className="rule" />
+          <footer className="site-footer">
+            <span>{SITE.disclaimer}</span>
+            <span>News from Google News and The Ken headlines. AI by Gemini Flash.</span>
+          </footer>
+        </div>
       </body>
     </html>
   );
