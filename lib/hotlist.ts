@@ -44,11 +44,17 @@ export async function runHotList(opts: HotListOptions = {}) {
   if (runErr) throw runErr;
 
   try {
-    // 1. Collect first if the last collect is older than 6 hours.
+    // 1. Collect first if the last collect is older than 6 hours, or if the morning collect
+    //    stopped at its time limit before reaching every account.
     const lastCollect = await getLastRun("collect");
-    if (!lastCollect || now.getTime() - new Date(lastCollect.finished_at!).getTime() > STALE_COLLECT_MS) {
-      log("Last collect is older than 6 hours; running a short collect pass first.");
-      const c = await runCollect({ deadlineMs: opts.collectDeadlineMs ?? 120_000 });
+    const staleBefore = new Date(now.getTime() - STALE_COLLECT_MS);
+    const { count: staleCount } = await db
+      .from("accounts")
+      .select("id", { count: "exact", head: true })
+      .or(`last_checked_at.is.null,last_checked_at.lt.${staleBefore.toISOString()}`);
+    if (!lastCollect || new Date(lastCollect.finished_at!) < staleBefore || (staleCount ?? 0) > 0) {
+      log(`${staleCount ?? "?"} accounts not checked in the last 6 hours; running a short collect pass first.`);
+      const c = await runCollect({ checkedBefore: staleBefore, deadlineMs: opts.collectDeadlineMs ?? 120_000 });
       log(`Collect pass: ${c.processed} accounts, ${c.signalsFound} new signals.`);
     }
 

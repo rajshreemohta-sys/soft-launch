@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SITE } from "@/lib/site";
 import { Nav } from "./Nav";
+import { RunControls } from "./RunControls";
 
 export function Header() {
   return (
@@ -13,6 +14,7 @@ export function Header() {
         {SITE.name}
       </Link>
       <Nav />
+      <RunControls />
     </header>
   );
 }

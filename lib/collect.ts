@@ -126,6 +126,7 @@ export async function collectAccount(account: Row): Promise<AccountResult> {
 export type CollectRunOptions = {
   companyNames?: string[]; // only these accounts
   limit?: number;          // at most this many accounts
+  checkedBefore?: Date;    // only accounts not checked since this time (for batched manual runs)
   deadlineMs?: number;     // stop starting new accounts after this many ms
   onAccount?: (r: AccountResult | { company: string; error: string }) => void;
 };
@@ -145,6 +146,9 @@ export async function runCollect(opts: CollectRunOptions = {}) {
     .order("last_checked_at", { ascending: true, nullsFirst: true })
     .order("company_name");
   if (opts.companyNames?.length) query = query.in("company_name", opts.companyNames);
+  if (opts.checkedBefore) {
+    query = query.or(`last_checked_at.is.null,last_checked_at.lt.${opts.checkedBefore.toISOString()}`);
+  }
   if (opts.limit) query = query.limit(opts.limit);
   const { data: accounts, error: accErr } = await query;
   if (accErr) throw accErr;
@@ -175,7 +179,8 @@ export async function runCollect(opts: CollectRunOptions = {}) {
     errors.push(`rescore: ${e instanceof Error ? e.message : JSON.stringify(e)}`);
   }
 
-  const remaining = (accounts?.length ?? 0) - processed;
+  // Accounts whose news was not checked in this run (stopped at the deadline, or failed).
+  const remaining = (accounts?.length ?? 0) - checkedIds.size;
   await db
     .from("pipeline_runs")
     .update({

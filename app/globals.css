@@ -264,6 +264,60 @@ h3.display {
   white-space: nowrap;
 }
 
+/* ------------------------------------------------------------ run controls */
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.run-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.run-dialog {
+  margin: auto;
+  width: min(460px, calc(100vw - 32px));
+  border: 1px solid var(--ink);
+  border-radius: 14px;
+  padding: 28px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.run-dialog::backdrop {
+  background: rgb(0 0 0 / 0.35);
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.field input {
+  font: 16px var(--body);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  padding: 10px 16px;
+}
+
+.run-status {
+  min-height: 24px;
+  margin: 16px 0;
+  font-size: 15px;
+}
+
+.run-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 /* ------------------------------------------------------------ hero */
 
 .hero {
