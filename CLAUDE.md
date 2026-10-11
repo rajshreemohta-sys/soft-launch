@@ -201,6 +201,7 @@ For each account, oldest `last_checked_at` first:
 1. **Fetch news:** Google News RSS search for each search term combined with trigger keywords, restricted to India and the last 7 days, e.g.
    `https://news.google.com/rss/search?q=<"Company"> (hiring OR appoints OR CHRO OR funding OR expansion OR attrition OR digital) when:7d&hl=en-IN&gl=IN&ceid=IN:en`
    Run 1–2 queries per company. Collect title, link, source, published date, snippet.
+   **Also The Ken** (Rajshree's request): a third Google News query `site:the-ken.com <names> when:Nd` per company. Ken articles are kept only if the company is named in the headline (its newsletters mention big names in passing). Headlines only: never log in or fetch paywalled text. The Ken's own RSS feed was checked and is not useful (10 items, no teaser).
 2. **Skip anything already in `seen_articles`.**
 3. **Classify with Gemini:** send all of the company's new articles in **one call**, plus summaries of its signals from the last 14 days (so Gemini can recognise repeat coverage of an event already recorded). See prompt A.
 4. **Save:** one `signals` row per new trigger event (articles about the same event are merged, using the earliest/most authoritative URL). Mark every article in `seen_articles`.
