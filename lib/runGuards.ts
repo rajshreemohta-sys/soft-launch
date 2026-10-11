@@ -5,6 +5,7 @@ import { supabaseAdmin } from "./supabase";
 // clicks from spamming the inbox or burning Gemini quota.
 
 export const HOTLIST_COOLDOWN_MIN = 10;
+export const HOTLIST_DAILY_CAP = 6; // manual + scheduled Hot Lists per IST day
 const RUNNING_WINDOW_MIN = 5; // a run older than this without finishing is treated as dead
 
 export async function hotListCooldownMinutesLeft(): Promise<number> {
@@ -21,6 +22,19 @@ export async function hotListCooldownMinutesLeft(): Promise<number> {
   if (!data) return 0;
   const elapsed = (Date.now() - new Date(data.started_at).getTime()) / 60_000;
   return Math.max(1, Math.ceil(HOTLIST_COOLDOWN_MIN - elapsed));
+}
+
+// Hot Lists built since midnight IST.
+export async function hotListsToday(): Promise<number> {
+  const ist = new Date(Date.now() + 330 * 60_000);
+  const midnightIst = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate()) - 330 * 60_000;
+  const { count, error } = await supabaseAdmin()
+    .from("pipeline_runs")
+    .select("id", { count: "exact", head: true })
+    .eq("kind", "hotlist")
+    .gte("started_at", new Date(midnightIst).toISOString());
+  if (error) throw error;
+  return count ?? 0;
 }
 
 export async function collectIsRunning(): Promise<boolean> {

@@ -14,6 +14,8 @@ const interTight = Inter_Tight({
 export const metadata: Metadata = {
   title: { default: SITE.name, template: `%s · ${SITE.name}` },
   description: "Watches live news for 40 accounts and ranks who is worth a call this week.",
+  // Shared by link only (e.g. with the professor); keep it out of search results.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
