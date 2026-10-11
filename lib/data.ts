@@ -1,6 +1,7 @@
 import "server-only";
 import { supabaseAdmin, type Account } from "./supabase";
 import { HOT_LIST_WINDOW_DAYS } from "./site";
+import type { HotListEmailEntry, WarmEntry } from "./email";
 
 // Server-side reads for the dashboard. Never import this into a client component.
 
@@ -92,17 +93,58 @@ export async function getEligibleRanking(windowDays = HOT_LIST_WINDOW_DAYS): Pro
   return accounts.map((account, i) => ({ rank: i + 1, account, signal: fresh.get(account.id)! }));
 }
 
-// What the home page shows: the saved Hot List (hot_rank set by the Hot List run) if there
-// is one, otherwise a live ranking of eligible accounts.
-export async function getHotList(): Promise<{ entries: HotListEntry[]; saved: boolean; eligibleCount: number }> {
-  const ranking = await getEligibleRanking();
-  const saved = (await getAccounts()).filter((a) => a.hot_rank !== null).sort((a, b) => a.hot_rank! - b.hot_rank!);
-  if (saved.length) {
-    const fresh = await freshSignalsByAccount(30);
-    const entries = saved
-      .filter((a) => fresh.has(a.id))
-      .map((account) => ({ rank: account.hot_rank!, account, signal: fresh.get(account.id)! }));
-    return { entries, saved: true, eligibleCount: ranking.length };
+export type SavedHotList = {
+  id: string;
+  created_at: string;
+  subject: string;
+  html: string;
+  entries: HotListEmailEntry[];
+  warm: WarmEntry[];
+  dry_run: boolean;
+  sent_at: string | null;
+  error: string | null;
+};
+
+export async function getLatestHotList(): Promise<SavedHotList | null> {
+  const { data, error } = await supabaseAdmin()
+    .from("hotlists")
+    .select("id, created_at, subject, html, entries, warm, dry_run, sent_at, error")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data as SavedHotList | null;
+}
+
+// What the home page shows: the latest saved Hot List (ranks set by the Hot List run, with
+// Gemini's one-line summaries) if there is one, otherwise a live ranking of eligible accounts.
+export async function getHotList(): Promise<{
+  entries: HotListEntry[];
+  saved: SavedHotList | null;
+  eligibleCount: number;
+}> {
+  const [ranking, accounts, latest] = await Promise.all([getEligibleRanking(), getAccounts(), getLatestHotList()]);
+  const ranked = new Map(accounts.filter((a) => a.hot_rank !== null).map((a) => [a.id, a]));
+  if (latest && ranked.size) {
+    const entries = latest.entries
+      .filter((e) => ranked.has(e.account_id))
+      .map((e) => ({
+        rank: e.rank,
+        account: ranked.get(e.account_id)!,
+        signal: {
+          id: `${latest.id}-${e.rank}`,
+          account_id: e.account_id,
+          signal_type: e.signal_type,
+          strength: 0,
+          summary: e.one_line_summary,
+          source_url: e.source_url,
+          source_title: null,
+          source_name: e.source_name,
+          published_at: e.published_at,
+          reasoning: null,
+        },
+      }));
+    return { entries, saved: latest, eligibleCount: ranking.length };
   }
-  return { entries: ranking.slice(0, 10), saved: false, eligibleCount: ranking.length };
+  return { entries: ranking.slice(0, 10), saved: null, eligibleCount: ranking.length };
 }

@@ -71,3 +71,47 @@ export const classifySchema = {
   },
   required: ["events"],
 } as const;
+
+// ---------------------------------------------------------------- Prompt B: Hot List summary + outreach angle
+
+const STAGE_GUIDANCE: Record<string, string> = {
+  outreach: "a prospect Arjun has not really engaged yet: give him a reason to start a conversation",
+  in_conversation: "a prospect already talking to Arjun: give him a reason to move the conversation forward",
+  pilot: "a company running a pilot: give him a reason to expand the pilot",
+  customer_expansion: "an existing customer: give him an upsell or rollout angle",
+};
+
+export function outreachPrompt(input: {
+  companyName: string;
+  sector: string;
+  dealStage: string | null;
+  arjunNotes: string | null;
+  signals: RecentSignal[];
+}): string {
+  const signals = input.signals.map((s) => `- ${s.published_at.slice(0, 10)} ${s.signal_type}: ${s.summary}`).join("\n");
+  const stage = input.dealStage ?? "outreach";
+  return `You write short, practical sales notes for Arjun, who sells workforce management software in India.
+
+${productContext()}
+
+Company: ${input.companyName}
+Sector: ${input.sector}
+Deal stage: ${stage} (${STAGE_GUIDANCE[stage] ?? STAGE_GUIDANCE.outreach})
+Arjun's private notes (read-only context): ${input.arjunNotes || "(none)"}
+
+Trigger events from the last 30 days, newest first:
+${signals}
+
+Write:
+1. one_line_summary: at most 20 words. What changed and when (use the date, e.g. "on 9 Oct"). Lead with the newest event; mention an earlier one only if it forms a pattern.
+2. outreach_angle: at most 45 words. Connect the trigger, or the combined story across the events (e.g. funding, then a new HR head, then hiring), to ONE specific capability of the product, and fit the deal stage above. Write it as advice to Arjun ("Pitch...", "Offer...", "Ask..."). Plain and specific. No hype, no exclamation marks, no invented numbers, names or facts beyond the events and notes above.`;
+}
+
+export const outreachSchema = {
+  type: "object",
+  properties: {
+    one_line_summary: { type: "string" },
+    outreach_angle: { type: "string" },
+  },
+  required: ["one_line_summary", "outreach_angle"],
+} as const;

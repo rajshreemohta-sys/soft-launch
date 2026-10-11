@@ -43,6 +43,9 @@ async function HotList() {
   const [{ entries, saved, eligibleCount }, lastCollect] = await Promise.all([getHotList(), getLastRun("collect")]);
 
   const updated = lastCollect ? `Updated ${formatRunTime(lastCollect.finished_at!)}.` : "Not collected yet.";
+  const note = saved
+    ? `Hot List built ${formatRunTime(saved.created_at)}${saved.dry_run ? " (dry run, not emailed)" : saved.sent_at ? ", emailed to Arjun" : ""}.`
+    : "Live ranking. Outreach angles are added when the Hot List email is built.";
   const count =
     eligibleCount === 1 ? "1 account has fresh signals." : `${eligibleCount} accounts have fresh signals.`;
 
@@ -50,7 +53,7 @@ async function HotList() {
     <>
       <Band
         text={`${updated} ${count}`}
-        note={saved ? undefined : "Live ranking. Outreach angles are added when the Hot List email is built."}
+        note={note}
       />
       <section className="section">
         {entries.length ? (
