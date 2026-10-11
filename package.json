@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "news:coverage": "node scripts/news-coverage.mts",
-    "collect": "tsx --conditions=react-server --env-file=.env.local scripts/collect.mts"
+    "collect": "tsx --conditions=react-server --env-file=.env.local scripts/collect.mts",
+    "test": "tsx --test tests/*.test.ts",
+    "test:protection": "tsx --conditions=react-server --env-file=.env.local scripts/test-protection.mts",
+    "rescore": "tsx --conditions=react-server --env-file=.env.local scripts/rescore.mts"
   },
   "dependencies": {
     "@google/genai": "^2.28.0",

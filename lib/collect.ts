@@ -4,6 +4,7 @@ import { classifyPrompt, classifySchema, type RecentSignal } from "./prompts";
 import { generateJson } from "./gemini";
 import { supabaseAdmin, type Account } from "./supabase";
 import { SIGNAL_TYPES } from "./taxonomy";
+import { rescoreAll } from "./rescore";
 
 const NEWS_DAYS = 7;
 const RECENT_SIGNAL_DAYS = 14;
@@ -34,7 +35,7 @@ export type AccountResult = {
 type Row = Pick<Account, "id" | "company_name" | "sector" | "search_terms">;
 
 // Steps 1-4 of the collect pipeline for one account: fetch, skip seen, classify, save.
-// Scoring and write-back (step 5) live in Phase 5.
+// Step 5 (rescore + write-back) runs once per run for all accounts, in runCollect.
 export async function collectAccount(account: Row): Promise<AccountResult> {
   const db = supabaseAdmin();
   const result: AccountResult = { company: account.company_name, fetched: 0, newArticles: 0, events: 0, signalsSaved: 0, savedSummaries: [] };
@@ -151,10 +152,12 @@ export async function runCollect(opts: CollectRunOptions = {}) {
   let processed = 0;
   let signalsFound = 0;
   const errors: string[] = [];
+  const checkedIds = new Set<string>();
   for (const account of accounts ?? []) {
     if (opts.deadlineMs && Date.now() - started > opts.deadlineMs) break;
     try {
       const r = await collectAccount(account);
+      checkedIds.add(account.id);
       signalsFound += r.signalsSaved;
       opts.onAccount?.(r);
     } catch (e) {
@@ -163,6 +166,13 @@ export async function runCollect(opts: CollectRunOptions = {}) {
       opts.onAccount?.({ company: account.company_name, error: message });
     }
     processed++;
+  }
+
+  // 5. Rescore every account (not just those with new news) so fading applies daily.
+  try {
+    await rescoreAll(checkedIds);
+  } catch (e) {
+    errors.push(`rescore: ${e instanceof Error ? e.message : JSON.stringify(e)}`);
   }
 
   const remaining = (accounts?.length ?? 0) - processed;
