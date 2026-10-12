@@ -1,13 +1,13 @@
-# Signal Desk: B2B account signal monitor
+# ShiftSense: B2B account signal monitor
 
 > Demo project. Companies and news are real; Arjun, his product and all deal notes are fictional. Built for a Mesa School of Business exam project.
 
 **Live dashboard:** https://soft-launch-psi.vercel.app
 **How it works (Components Map):** https://soft-launch-psi.vercel.app/how-it-works
 
-Arjun sells workforce management software ("ShiftSense") to mid-market and enterprise companies in India and tracks 40 accounts at different deal stages. His problem is timing: which accounts have a fresh trigger event that makes *this* the right week to reach out?
+Arjun sells workforce management software, ShiftSense, to mid-market and enterprise companies in India and tracks 40 accounts at different deal stages. His problem is timing: which accounts have a fresh trigger event that makes *this* the right week to reach out?
 
-Signal Desk:
+ShiftSense:
 
 1. Reads live news for all 40 accounts every morning (Google News RSS, plus The Ken's headlines).
 2. Uses **Gemini Flash** to decide which articles are real trigger events, what type, and how strong.

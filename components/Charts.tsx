@@ -4,19 +4,20 @@ import { SIGNAL_LABELS, SIGNAL_TYPES, type SignalType } from "@/lib/taxonomy";
 // Server-rendered SVG charts in the dashboard palette. Identity is never colour alone:
 // every bar carries a text label, and each mark has a hover tooltip (<title>).
 
+// Colours are CSS variables so light and dark themes both work. SVG presentation
+// attributes can't read var(), so marks set colours through style={{ ... }}.
 export const TYPE_COLOR: Record<SignalType, string> = {
-  headcount_expansion: "#3D6549",
-  new_leader: "#DE8C68",
-  workforce_digitalisation: "#6E8761",
-  funding: "#A3829A",
-  operational_challenge: "#000000",
-  other_relevant: "#D6D3CC",
+  headcount_expansion: "var(--green)",
+  new_leader: "var(--terracotta)",
+  workforce_digitalisation: "var(--sage)",
+  funding: "var(--mauve)",
+  operational_challenge: "var(--ink)",
+  other_relevant: "var(--line)",
 };
 
-const INK = "#000000";
-const MUTED = "#5C5A55";
-const GRID = "#E7E4DD";
-const TRACK = HEAT_COLORS.Cold;
+const MUTED = "var(--muted)";
+const GRID = "var(--grid)";
+const TRACK = "var(--heat-track)";
 
 // ---------------------------------------------------------------- gauge (semicircle meter)
 
@@ -37,8 +38,8 @@ export function Gauge({ value, size = 180, label, sublabel }: { value: number; s
     <figure className="gauge" style={{ width: size }}>
       <svg viewBox={`0 0 ${size} ${size / 2 + 14}`} role="img" aria-label={`${label ?? "Lead"}: ${band}, ${v} out of 100`}>
         <title>{`${label ?? "Lead"}: ${band}, ${v}/100`}</title>
-        <path d={arc(0, 100)} fill="none" stroke={TRACK} strokeWidth={stroke} strokeLinecap="round" />
-        {v > 0 && <path d={arc(0, Math.max(v, 1.5))} fill="none" stroke={HEAT_COLORS[band]} strokeWidth={stroke} strokeLinecap="round" />}
+        <path d={arc(0, 100)} fill="none" style={{ stroke: TRACK }} strokeWidth={stroke} strokeLinecap="round" />
+        {v > 0 && <path d={arc(0, Math.max(v, 1.5))} fill="none" style={{ stroke: HEAT_COLORS[band] }} strokeWidth={stroke} strokeLinecap="round" />}
         <text x={cx} y={cy - 6} textAnchor="middle" className="gauge-value" fontSize={size / 4.6}>{v}</text>
       </svg>
       <figcaption>
@@ -64,8 +65,8 @@ export function MiniGauge({ value, size = 96 }: { value: number; size?: number }
   return (
     <svg width={size} viewBox={`0 0 ${size} ${size / 2 + 10}`} role="img" aria-label={`${band}, ${v} out of 100`}>
       <title>{`${band}, ${v}/100`}</title>
-      <path d={arc(100)} fill="none" stroke={TRACK} strokeWidth={stroke} strokeLinecap="round" />
-      {v > 0 && <path d={arc(Math.max(v, 1.5))} fill="none" stroke={HEAT_COLORS[band]} strokeWidth={stroke} strokeLinecap="round" />}
+      <path d={arc(100)} fill="none" style={{ stroke: TRACK }} strokeWidth={stroke} strokeLinecap="round" />
+      {v > 0 && <path d={arc(Math.max(v, 1.5))} fill="none" style={{ stroke: HEAT_COLORS[band] }} strokeWidth={stroke} strokeLinecap="round" />}
       <text x={cx} y={cy - 4} textAnchor="middle" className="gauge-value" fontSize={size / 4.2}>{v}</text>
     </svg>
   );
@@ -103,7 +104,7 @@ export function SignalsPerDay({ days }: { days: { date: string; label: string; c
     <svg viewBox={`0 0 ${W} ${H}`} className="chart" role="img" aria-label={`New trigger events per day over the last ${days.length} days`}>
       {ticks.map((t) => (
         <g key={t}>
-          <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} stroke={GRID} strokeWidth={1} />
+          <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} style={{ stroke: GRID }} strokeWidth={1} />
           <text x={pad.l - 6} y={y(t) + 4} textAnchor="end" className="axis">{t}</text>
         </g>
       ))}
@@ -114,7 +115,7 @@ export function SignalsPerDay({ days }: { days: { date: string; label: string; c
           <g key={d.date}>
             <title>{`${d.label}: ${d.count} new ${d.count === 1 ? "signal" : "signals"}`}</title>
             <rect x={pad.l + i * slot} y={pad.t} width={slot} height={H - pad.t - pad.b} fill="transparent" />
-            {d.count > 0 && <path d={roundedTop(x, y(d.count), bw, h, 4)} fill="#3D6549" />}
+            {d.count > 0 && <path d={roundedTop(x, y(d.count), bw, h, 4)} style={{ fill: "var(--chart-green)" }} />}
             {d.count > 0 && <text x={x + bw / 2} y={y(d.count) - 6} textAnchor="middle" className="axis">{d.count}</text>}
           </g>
         );
@@ -209,15 +210,15 @@ export function StockChart({ points, currency }: { points: { t: number; close: n
   const y = (v: number) => pad.t + (1 - (v - lo) / span) * (H - pad.t - pad.b);
   const line = points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.close).toFixed(1)}`).join(" ");
   const up = closes.at(-1)! >= closes[0];
-  const color = up ? "#3D6549" : "#B3532E";
+  const color = up ? "var(--chart-green)" : "var(--down)";
   const fmt = (v: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency, maximumFractionDigits: 0 }).format(v);
   const month = (t: number) => new Intl.DateTimeFormat("en-IN", { month: "short", timeZone: "Asia/Kolkata" }).format(t);
   const step = Math.max(1, Math.floor(points.length / 40));
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="chart" role="img" aria-label={`Share price over 6 months, from ${fmt(closes[0])} to ${fmt(closes.at(-1)!)}`}>
-      <path d={`${line} L${x(points.length - 1)},${H - pad.b} L${x(0)},${H - pad.b} Z`} fill={color} opacity={0.1} />
-      <path d={line} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={x(points.length - 1)} cy={y(closes.at(-1)!)} r={4} fill={color} stroke="#fff" strokeWidth={2} />
+      <path d={`${line} L${x(points.length - 1)},${H - pad.b} L${x(0)},${H - pad.b} Z`} style={{ fill: color }} opacity={0.12} />
+      <path d={line} fill="none" style={{ stroke: color }} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={x(points.length - 1)} cy={y(closes.at(-1)!)} r={4} style={{ fill: color, stroke: "var(--paper)" }} strokeWidth={2} />
       {points.map((p, i) =>
         i % step === 0 ? (
           <rect key={p.t} x={x(i) - (W / points.length) * step / 2} y={0} width={(W / points.length) * step} height={H - pad.b} fill="transparent">
@@ -231,4 +232,3 @@ export function StockChart({ points, currency }: { points: { t: number; close: n
   );
 }
 
-export { INK };

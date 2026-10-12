@@ -3,6 +3,7 @@ import { SITE } from "@/lib/site";
 import { LogoMark } from "./Logo";
 import { Nav } from "./Nav";
 import { RunControls } from "./RunControls";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
   return (
@@ -12,7 +13,10 @@ export function Header() {
         {SITE.name}
       </Link>
       <Nav />
-      <RunControls />
+      <div className="header-actions">
+        <RunControls />
+        <ThemeToggle />
+      </div>
     </header>
   );
 }

@@ -64,7 +64,7 @@ export default function HowItWorksPage() {
               {SIGNAL_TYPES.map((t) => (
                 <tr key={t}>
                   <td><SignalTag type={t} /></td>
-                  <td>{MEANINGS[t]}</td>
+                  <td className="wrap">{MEANINGS[t]}</td>
                   <td className="num">{TYPE_WEIGHTS[t]}</td>
                 </tr>
               ))}

@@ -1,7 +1,7 @@
 // Names and copy that are still open decisions. Change them here only.
 export const SITE = {
-  // TODO(Rajshree): dashboard name
-  name: "Signal Desk",
+  // Rajshree: the site carries Arjun's company/product name from the brief.
+  name: "ShiftSense",
   disclaimer: "Demo project. Companies and news are real; Arjun, his product and all deal notes are fictional.",
 };
 

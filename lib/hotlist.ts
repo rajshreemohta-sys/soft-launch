@@ -183,7 +183,7 @@ async function sendEmail(subject: string, html: string): Promise<{ id: string | 
   const to = process.env.HOTLIST_TO_EMAIL;
   if (!key || !to) return { id: null, error: "RESEND_API_KEY or HOTLIST_TO_EMAIL is not set" };
   // Until a domain is verified, Resend's test sender only delivers to the Resend account owner.
-  const from = process.env.HOTLIST_FROM_EMAIL || "Signal Desk <onboarding@resend.dev>";
+  const from = process.env.HOTLIST_FROM_EMAIL || "ShiftSense <onboarding@resend.dev>";
   const { data, error } = await new Resend(key).emails.send({ from, to, subject, html });
   return { id: data?.id ?? null, error: error ? `${error.name}: ${error.message}` : null };
 }

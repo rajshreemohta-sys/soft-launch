@@ -21,7 +21,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${interTight.variable}`}>
+    <html lang="en" className={`${inter.variable} ${interTight.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Apply a saved light/dark choice before first paint, so the page never flashes. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}`,
+          }}
+        />
+      </head>
       <body>
         <div className="shell">
           <Header />

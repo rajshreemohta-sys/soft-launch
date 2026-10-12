@@ -1,5 +1,4 @@
 // Arjun's product. Edit freely; every Gemini prompt reads from here.
-// TODO(Rajshree): final product name.
 export const PRODUCT = {
   name: "ShiftSense",
   whatItIs:
