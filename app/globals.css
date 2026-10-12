@@ -1562,6 +1562,15 @@ h3.display {
   width: 100%;
 }
 
+.field-error {
+  color: var(--down);
+  font-size: 12px;
+}
+
+.field input[aria-invalid="true"] {
+  border-color: var(--down);
+}
+
 .field .over {
   color: var(--down);
 }

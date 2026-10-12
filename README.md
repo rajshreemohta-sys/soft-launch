@@ -123,7 +123,7 @@ Each account page (`app/accounts/[id]/page.tsx`) is a full brief on the company:
 - **Share price** (`lib/live.ts`): six months of NSE closes from Yahoo Finance, cached for an hour.
 - **Recent news**: the last 14 days from the same Google News search, cached for an hour.
 - **What the AI says** (`lib/insights.ts`): Gemini Flash writes a verdict, why now, three approach steps, talking points, risks, the best first contact, an email (under 130 words) and a LinkedIn note (under 280 characters). Arjun's stage and notes are read-only context. Regenerated when a newer signal arrives or after a week.
-- **Drafts are never sent automatically.** They are editable on the page and open in Gmail or the mail app, or copy for LinkedIn (leaders are linked by LinkedIn search, never scraped).
+- **Drafts are sent from the user's own email, never by the site.** Add the person's address in the To field (remembered per company on that device), edit the draft, then "Send with Gmail" or "Send with mail app" opens a ready-to-send message. The LinkedIn note copies with one click (leaders are linked by LinkedIn search, never scraped). The public site deliberately has no server-side send, so it cannot be used as an open email relay.
 
 Run `npm run enrich` to research every company and write insights (`-- --force Zepto` to redo one).
 
