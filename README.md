@@ -33,40 +33,7 @@ ShiftSense:
 
 ![ShiftSense components map: who does what, from trigger to output](public/components-map.jpg)
 
-Source: `docs/components-map.html` (rendered to `public/components-map.jpg`). The same system as a Mermaid flow:
-
-```mermaid
-flowchart TB
-  subgraph collect["1 · Collect: daily 6 AM IST, or Run collection now"]
-    direction LR
-    cron1["Vercel Cron / button"] --> collectRoute["/api/cron/collect"] --> rss["Google News RSS<br/>+ The Ken"] --> gem1["Gemini Flash<br/>classify triggers"] --> score["Scoring<br/>decay · weight · momentum"]
-  end
-
-  subgraph db["2 · Supabase (Postgres, RLS on)"]
-    direction LR
-    signals[("signals")] ~~~ seen[("seen_articles")] ~~~ rpc["Write RPCs<br/>system columns only"] --> guard{{"Guard trigger<br/>blocks Arjun's columns"}} --> accounts[("accounts")]
-  end
-
-  subgraph hot["3 · Hot List: Mon + Thu 8 AM IST, or Send Hot List now"]
-    direction LR
-    cron2["Vercel Cron / button"] --> hotRoute["/api/cron/hotlist"] --> gem2["Gemini Flash<br/>summary + outreach angle"] --> resend["Resend"] --> inbox(["Arjun's inbox"])
-  end
-
-  subgraph analysis["4 · Account analysis"]
-    direction LR
-    research["Gemini Flash + Google Search<br/>company facts, financials, leaders"] ~~~ insight["Gemini Flash<br/>lead read + email and LinkedIn drafts"] ~~~ yahoo["Yahoo Finance<br/>share price"]
-  end
-
-  dash["Dashboard on Vercel<br/>reads Supabase server-side"]
-
-  collect -- "signals, seen articles,<br/>scores via RPC" --> db
-  db -- "top 10 eligible accounts;<br/>angles saved via RPC" --> hot
-  analysis -- "profiles, insights" --> db
-  db --> dash
-  analysis --> dash
-```
-
-(Source of truth: `lib/componentsMap.ts`, which also renders on `/how-it-works`.)
+Source: `docs/components-map.html`, rendered to `public/components-map.jpg` with headless Chrome. To change it, edit the HTML and re-render.
 
 ## Architecture
 
@@ -259,7 +226,7 @@ npm run enrich              # research company profiles and write AI insights (m
 app/                 pages (Hot List, accounts, account detail, how it works, email preview) and API routes
   api/cron/          collect + hotlist, called by Vercel Cron (CRON_SECRET)
   api/run/           collect + hotlist, called by the dashboard buttons (rate-limited)
-components/          header, run buttons, cards, tags, arcs, Mermaid diagram, email frame
+components/          header, run buttons, cards, tags, arcs, email frame
 lib/                 news, Gemini, prompts, collect, scoring, rescore, Hot List, email, data access
 supabase/migrations/ schema, write-path RPCs, guard trigger, RLS
 seed/                40 accounts (JSON) and generated SQL

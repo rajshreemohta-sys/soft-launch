@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { Mermaid } from "@/components/Mermaid";
 import { SignalTag } from "@/components/Tag";
-import { COMPONENTS_MAP } from "@/lib/componentsMap";
 import { PRODUCT } from "@/lib/product";
 import { HALF_LIFE_DAYS, LOOKBACK_DAYS, MOMENTUM_MULTIPLIER, MOMENTUM_WINDOW_DAYS, TYPE_WEIGHTS } from "@/lib/scoring";
 import { HOT_LIST_WINDOW_DAYS, SITE } from "@/lib/site";
@@ -41,8 +39,6 @@ export default function HowItWorksPage() {
             alt="Components map: who does what. Steps 1 to 5 every morning: the web app starts a collect, live sources supply news, Gemini classifies triggers, the scoring engine scores every account, and Supabase saves results through a guarded RPC. Steps 6 to 10 on Monday and Thursday: the scoring engine picks the top 10, Gemini writes the outreach angle, Resend sends the Hot List to Arjun's inbox."
           />
         </a>
-        <p className="muted small" style={{ margin: "32px 0 16px" }}>The same system as a technical flow diagram:</p>
-        <Mermaid chart={COMPONENTS_MAP} label="Components map: Vercel Cron triggers the collect route, which reads Google News, classifies with Gemini Flash, saves to Supabase, scores accounts and writes back through a guarded RPC. Twice a week the Hot List route asks Gemini Flash for outreach angles and emails Arjun through Resend. The dashboard reads from Supabase." />
       </section>
       <div className="rule" />
       <div className="how-grid">
