@@ -21,12 +21,11 @@ const MEANINGS: Record<string, string> = {
 export default function HowItWorksPage() {
   return (
     <>
-      <section className="section">
-        <p className="eyebrow">How it works</p>
-        <h1 className="display">From headline to Hot List</h1>
-        <p className="lede">
-          Every morning the system reads the news for 40 accounts, asks Gemini Flash which items are real trigger
-          events for {PRODUCT.name}, scores every account, and twice a week emails Arjun the ten worth a call.
+      <section className="page-head">
+        <h1 className="page-title">How it works</h1>
+        <p className="muted small">
+          Every morning the system reads the news for 40 accounts, asks Gemini Flash which items are real trigger events
+          for {PRODUCT.name}, scores every account, and twice a week emails Arjun the ten worth a call.
         </p>
       </section>
       <div className="rule" />
@@ -36,8 +35,9 @@ export default function HowItWorksPage() {
         <Mermaid chart={COMPONENTS_MAP} label="Components map: Vercel Cron triggers the collect route, which reads Google News, classifies with Gemini Flash, saves to Supabase, scores accounts and writes back through a guarded RPC. Twice a week the Hot List route asks Gemini Flash for outreach angles and emails Arjun through Resend. The dashboard reads from Supabase." />
       </section>
       <div className="rule" />
+      <div className="how-grid">
 
-      <section className="section">
+      <section className="section how-cell">
         <div className="prose">
           <h2 className="display">1. Collect, every day at 6 AM</h2>
           <ul>
@@ -48,9 +48,8 @@ export default function HowItWorksPage() {
           </ul>
         </div>
       </section>
-      <div className="rule" />
 
-      <section className="section">
+      <section className="section how-cell">
         <h2 className="display" style={{ marginBottom: 24 }}>2. What counts as a trigger</h2>
         <div className="table-scroll">
           <table className="table" style={{ minWidth: 560 }}>
@@ -77,9 +76,8 @@ export default function HowItWorksPage() {
           CSR, awards, sector commentary, and passing mentions.
         </p>
       </section>
-      <div className="rule" />
 
-      <section className="section">
+      <section className="section how-cell">
         <div className="prose">
           <h2 className="display">3. Scoring</h2>
           <p className="formula">{`signal value  = strength × type weight × 0.5 ^ (age in days ÷ ${HALF_LIFE_DAYS})
@@ -92,9 +90,8 @@ account score = sum of signal values from the last ${LOOKBACK_DAYS} days
           </ul>
         </div>
       </section>
-      <div className="rule" />
 
-      <section className="section">
+      <section className="section how-cell">
         <div className="prose">
           <h2 className="display">4. Arjun&rsquo;s columns are protected</h2>
           <p>
@@ -109,9 +106,8 @@ account score = sum of signal values from the last ${LOOKBACK_DAYS} days
           <p className="muted small">An automated test (<code>npm run test:protection</code>) plants a marker in Arjun&rsquo;s notes, runs the full pipeline, attempts two overwrites, and checks the marker survives.</p>
         </div>
       </section>
-      <div className="rule" />
 
-      <section className="section">
+      <section className="section how-cell">
         <div className="prose">
           <h2 className="display">5. Account analysis</h2>
           <ul>
@@ -123,9 +119,8 @@ account score = sum of signal values from the last ${LOOKBACK_DAYS} days
           </ul>
         </div>
       </section>
-      <div className="rule" />
 
-      <section className="section">
+      <section className="section how-cell">
         <div className="prose">
           <h2 className="display">Limitations</h2>
           <ul>
@@ -140,6 +135,7 @@ account score = sum of signal values from the last ${LOOKBACK_DAYS} days
           <p className="small muted">{SITE.disclaimer}</p>
         </div>
       </section>
+      </div>
     </>
   );
 }

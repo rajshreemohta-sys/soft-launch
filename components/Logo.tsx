@@ -11,28 +11,3 @@ export function LogoMark({ size = 26 }: { size?: number }) {
     </svg>
   );
 }
-
-// Hero composition: concentric signal waves on the blueprint grid.
-export function SignalArt() {
-  const rings = [
-    { r: 34, c: "var(--green)" },
-    { r: 62, c: "var(--sage)" },
-    { r: 90, c: "var(--terracotta)" },
-    { r: 118, c: "var(--mauve)" },
-  ];
-  return (
-    <svg className="arcs" viewBox="0 0 320 220" role="img" aria-label="Signal waves">
-      <g stroke="var(--line)" strokeWidth="1">
-        <path d="M0 110 H320 M160 0 V220" />
-      </g>
-      {rings.map(({ r, c }) => (
-        <g key={r} fill="none" stroke={c} strokeWidth="14" strokeLinecap="round">
-          <path d={`M${160 - r * 0.62} ${110 - r * 0.78} A${r} ${r} 0 0 0 ${160 - r * 0.62} ${110 + r * 0.78}`} />
-          <path d={`M${160 + r * 0.62} ${110 - r * 0.78} A${r} ${r} 0 0 1 ${160 + r * 0.62} ${110 + r * 0.78}`} />
-        </g>
-      ))}
-      <circle cx="160" cy="110" r="16" fill="var(--ink)" />
-      <circle cx="160" cy="110" r="2.5" fill="var(--paper)" />
-    </svg>
-  );
-}

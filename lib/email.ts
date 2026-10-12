@@ -153,8 +153,7 @@ export function hotListEmailHtml(input: {
       <span style="color:${C.terracotta};letter-spacing:-1px;">((</span><span style="color:${C.green};">&#9679;</span><span style="color:${C.terracotta};letter-spacing:-1px;">))</span> ${esc(SITE.name)}
     </td></tr>
     <tr><td style="padding:28px 24px 8px 24px;">
-      <div style="font:13px/1.4 ${FONT};color:${C.muted};margin:0 0 6px 0;">Hot List &middot; ${esc(emailDate(input.date))}</div>
-      <div style="font:600 30px/1.1 ${FONT};letter-spacing:-1px;color:${C.ink};margin:0 0 12px 0;">${esc(SITE.headline)}</div>
+      <div style="font:600 30px/1.1 ${FONT};letter-spacing:-1px;color:${C.ink};margin:0 0 12px 0;">Hot List &middot; ${esc(emailDate(input.date))}</div>
       <div style="font:15px/1.5 ${FONT};color:${C.muted};margin:0 0 24px 0;">${esc(intro)}</div>
     </td></tr>
     <tr><td style="padding:0 24px;">

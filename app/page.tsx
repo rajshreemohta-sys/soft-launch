@@ -3,28 +3,17 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { Carousel } from "@/components/Carousel";
 import { Gauge, MiniGauge, SignalsPerDay, StageTemperature, TriggersByType, TYPE_COLOR } from "@/components/Charts";
-import { SignalArt } from "@/components/Logo";
 import { SignalTag, StageTag } from "@/components/Tag";
 import { getDashboard } from "@/lib/dashboard";
 import { DEAL_STAGE_LABELS } from "@/lib/format";
 import { HEAT_BANDS, heatBand, heatIndex } from "@/lib/heat";
 import type { SignalType } from "@/lib/taxonomy";
-import { HOT_LIST_WINDOW_DAYS, SITE } from "@/lib/site";
+import { HOT_LIST_WINDOW_DAYS } from "@/lib/site";
 
 export default function HotListPage() {
   return (
     <>
-      <section className="hero hero-compact">
-        <div>
-          <p className="eyebrow">Hot List</p>
-          <h1 className="display">{SITE.headline}</h1>
-          <p className="lede">
-            40 accounts, read every morning. Fresh triggers heat a lead up; quiet accounts cool down on their own.
-          </p>
-        </div>
-        <SignalArt />
-      </section>
-      <div className="rule" />
+      <h1 className="sr-only">Hot List dashboard</h1>
       <Suspense fallback={<section className="section"><p className="muted">Loading the dashboard…</p></section>}>
         <Dashboard />
       </Suspense>
@@ -38,7 +27,7 @@ async function Dashboard() {
 
   return (
     <>
-      <section className="section section-tight">
+      <section className="section section-tight section-first">
         <div className="kpis">
           {HEAT_BANDS.map((b) => (
             <div key={b} className="kpi">

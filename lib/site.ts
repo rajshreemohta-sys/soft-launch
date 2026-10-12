@@ -2,8 +2,6 @@
 export const SITE = {
   // TODO(Rajshree): dashboard name
   name: "Signal Desk",
-  // TODO(Rajshree): replace this headline (Rajshree finds it cringe)
-  headline: "Who’s worth a call this week",
   disclaimer: "Demo project. Companies and news are real; Arjun, his product and all deal notes are fictional.",
 };
 

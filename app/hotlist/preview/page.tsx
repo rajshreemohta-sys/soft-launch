@@ -10,10 +10,9 @@ export const metadata: Metadata = { title: "Email preview" };
 export default function PreviewPage() {
   return (
     <>
-      <section className="section" style={{ paddingBottom: 32 }}>
-        <p className="eyebrow">Email preview</p>
-        <h1 className="display">The Monday and Thursday email</h1>
-        <p className="lede">The latest Hot List email exactly as it was, or will be, sent to Arjun.</p>
+      <section className="page-head">
+        <h1 className="page-title">Email preview</h1>
+        <p className="muted small">The latest Monday and Thursday Hot List email, exactly as it was (or will be) sent to Arjun.</p>
       </section>
       <div className="rule" />
       <section className="section">

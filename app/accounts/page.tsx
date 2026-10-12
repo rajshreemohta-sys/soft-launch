@@ -9,10 +9,9 @@ export const metadata: Metadata = { title: "Accounts" };
 export default function AccountsPage() {
   return (
     <>
-      <section className="section" style={{ paddingBottom: 32 }}>
-        <p className="eyebrow">All accounts</p>
-        <h1 className="display">Forty accounts, one ranking</h1>
-        <p className="lede">Sorted by signal score. Accounts with no signals in the last 30 days sit greyed at the bottom.</p>
+      <section className="page-head">
+        <h1 className="page-title">Accounts</h1>
+        <p className="muted small">Sorted by signal score. Accounts with no signals in the last 30 days sit greyed at the bottom.</p>
       </section>
       <div className="rule" />
       <section className="section">
