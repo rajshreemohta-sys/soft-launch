@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { Carousel } from "@/components/Carousel";
 import { TemperatureLadder } from "@/components/TemperatureLadder";
+import { ArcsArt } from "@/components/Logo";
 import { MiniGauge, SignalsPerDay, StageTemperature, TriggersByType, TYPE_COLOR } from "@/components/Charts";
 import { SignalTag, StageTag } from "@/components/Tag";
 import { getDashboard } from "@/lib/dashboard";
@@ -23,11 +24,23 @@ export default function HotListPage() {
 
 async function Dashboard() {
   await connection();
-  const { entries, bandCounts, hottest, newThisWeek, nextHotList, days, byType, stageRows } = await getDashboard();
+  const { greeting, today, entries, bandCounts, hottest, newThisWeek, nextHotList, days, byType, stageRows } = await getDashboard();
 
   return (
     <>
-      <section className="section section-tight section-first">
+      <section className="intro">
+        <div className="intro-text">
+          <p className="intro-date">{today}</p>
+          <h2 className="display intro-title">{greeting}, Arjun</h2>
+          <p className="muted">
+            {bandCounts.Hot} hot and {bandCounts.Warm} warm leads today, with {newThisWeek} new triggers this week. Next Hot List
+            email: {nextHotList}.
+          </p>
+        </div>
+        <ArcsArt />
+      </section>
+      <div className="rule" />
+      <section className="section section-tight">
         <nav className="kpis" aria-label="Lead summary">
           {HEAT_BANDS.map((b) => (
             <Link key={b} href={`/accounts?temp=${b.toLowerCase()}`} className={`kpi kpi-${b.toLowerCase()}`}>

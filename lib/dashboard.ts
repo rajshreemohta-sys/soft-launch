@@ -54,7 +54,13 @@ export async function getDashboard() {
     return { stage: label, counts };
   });
 
+  const hourIst = Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hourCycle: "h23", timeZone: TZ }).format(now));
+  const greeting = hourIst < 12 ? "Good morning" : hourIst < 17 ? "Good afternoon" : "Good evening";
+  const today = new Intl.DateTimeFormat("en-IN", { weekday: "long", day: "numeric", month: "long", timeZone: TZ }).format(now);
+
   return {
+    greeting,
+    today,
     entries,
     bandCounts,
     hottest: withHeat.filter((x) => x.heat > 0).slice(0, 8),
