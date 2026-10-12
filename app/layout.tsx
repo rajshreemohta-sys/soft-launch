@@ -14,7 +14,7 @@ const interTight = Inter_Tight({
 
 export const metadata: Metadata = {
   title: { default: SITE.name, template: `%s · ${SITE.name}` },
-  description: "Watches live news for 40 accounts and ranks who is worth a call this week.",
+  description: "Daily news signals, lead temperature and a twice-weekly Hot List for 40 B2B accounts.",
   // Shared by link only (e.g. with the professor); keep it out of search results.
   robots: { index: false, follow: false },
 };
