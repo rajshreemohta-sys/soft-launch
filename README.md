@@ -123,7 +123,7 @@ Each account page (`app/accounts/[id]/page.tsx`) is a full brief on the company:
 - **Share price** (`lib/live.ts`): six months of NSE closes from Yahoo Finance, cached for an hour.
 - **Recent news**: the last 14 days from the same Google News search, cached for an hour.
 - **What the AI says** (`lib/insights.ts`): Gemini Flash writes a verdict, why now, three approach steps, talking points, risks, the best first contact, an email (under 130 words) and a LinkedIn note (under 280 characters). Arjun's stage and notes are read-only context. Regenerated when a newer signal arrives or after a week.
-- **Drafts are sent from the user's own email, never by the site.** Add the person's address in the To field (remembered per company on that device), edit the draft, then "Send with Gmail" or "Send with mail app" opens a ready-to-send message. The LinkedIn note copies with one click (leaders are linked by LinkedIn search, never scraped). The public site deliberately has no server-side send, so it cannot be used as an open email relay.
+- **Send from the dashboard (demo-safe).** Add the recipient in the To field (remembered per company on that device), edit the draft and press **Send**. The site sends it through Resend only after a send passcode, only to approved test addresses (`OUTREACH_TEST_RECIPIENTS`, default the Resend account email), and at most 10 a day; each send is logged and carries the demo disclaimer, since the product is fictional and the executives are real. **Open in Gmail** opens the same draft in the user's own email for anyone else. The LinkedIn note copies with one click (leaders are linked by LinkedIn search, never scraped).
 
 Run `npm run enrich` to research every company and write insights (`-- --force Zepto` to redo one).
 
@@ -146,6 +146,7 @@ Tables (`supabase/migrations/001_init.sql` to `005_profiles_and_insights.sql`):
 - **`seen_articles`**: every article already sent to Gemini, per account (one article can matter to two accounts, e.g. "Blinkit beats Zepto").
 - **`pipeline_runs`**: run log for the dashboard and debugging.
 - **`hotlists`**: every Hot List build with its email HTML and entries.
+- **`outreach_sends`**: log of emails sent from the dashboard (`006_outreach_sends.sql`).
 - **`company_profiles`** and **`account_insights`**: researched company facts with sources, and Gemini's read and drafts (`005_profiles_and_insights.sql`).
 
 ### How Arjun's columns are protected
@@ -196,7 +197,7 @@ account score = sum of signal values from the last 30 days
    cd soft-launch
    npm install
    ```
-2. **Supabase:** create a project, then in the SQL editor run `supabase/migrations/001_init.sql` to `005_profiles_and_insights.sql` in order, then `seed/seed.sql`. (`seed/seed.sql` is generated from `seed/accounts.json` by `node seed/build-seed-sql.mjs`.)
+2. **Supabase:** create a project, then in the SQL editor run `supabase/migrations/001_init.sql` to `005_profiles_and_insights.sql` (through `006_outreach_sends.sql`) in order, then `seed/seed.sql`. (`seed/seed.sql` is generated from `seed/accounts.json` by `node seed/build-seed-sql.mjs`.)
 3. **Gemini:** create an API key in Google AI Studio.
 4. **Resend:** create an account and an API key. With the test sender, the email only reaches the Resend account owner.
 5. **Environment:** copy `.env.example` to `.env.local` and fill it in; add the same variables in Vercel → Settings → Environment Variables (secrets as *Secret*).
@@ -218,6 +219,9 @@ account score = sum of signal values from the last 30 days
 | `HOT_LIST_WINDOW_DAYS` | Eligibility window, default 3 |
 | `DRY_RUN` | `true` builds and saves the email without sending |
 | `APP_URL` | Optional base URL for email links |
+| `SEND_PASSCODE` | Passcode for the outreach Send button (the only protected action) |
+| `OUTREACH_TEST_RECIPIENTS` | Comma-separated addresses Send may email (default: `HOTLIST_TO_EMAIL`) |
+| `OUTREACH_FROM_EMAIL` / `OUTREACH_REPLY_TO` | Optional sender on a verified domain, and reply-to address |
 
 ## Commands and tests
 

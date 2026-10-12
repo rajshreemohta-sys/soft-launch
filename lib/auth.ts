@@ -14,4 +14,11 @@ export function isCronRequest(request: Request): boolean {
   return !!secret && safeEqual(header, `Bearer ${secret}`);
 }
 
+// The outreach Send button (the only passcode-protected action on the public site).
+export function hasSendPasscode(request: Request): boolean {
+  const passcode = process.env.SEND_PASSCODE;
+  const given = request.headers.get("x-send-passcode") ?? "";
+  return !!passcode && safeEqual(given, passcode);
+}
+
 export const unauthorized = () => Response.json({ error: "Not authorised" }, { status: 401 });

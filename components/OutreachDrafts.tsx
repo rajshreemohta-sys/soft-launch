@@ -4,14 +4,34 @@ import { useEffect, useState } from "react";
 
 const LINKEDIN_LIMIT = 300;
 
-// Drafts are editable here. Sending happens from the user's own email: the buttons open a
-// ready-to-send message (recipient, subject, body filled in) in Gmail or the mail app.
-// The site never sends to third parties itself: it is public, and Resend's test sender
-// only delivers to the account owner. The recipient address is remembered per company
-// on this device only.
+// Drafts are editable here. "Send" sends from the site through Resend, protected by a
+// passcode and limited to approved test recipients (the product is fictional; the
+// executives are real). "Open in Gmail" hands the draft to the user's own email for
+// anyone else. The recipient address is remembered per company on this device only.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const toKey = (company: string) => `shiftsense:to:${company}`;
+const PASS_KEY = "shiftsense:send-passcode";
+
+function readPass(): string {
+  try {
+    return sessionStorage.getItem(PASS_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function savePass(value: string | null) {
+  try {
+    if (value) sessionStorage.setItem(PASS_KEY, value);
+    else sessionStorage.removeItem(PASS_KEY);
+  } catch {
+    /* storage unavailable: asked again next time */
+  }
+}
+
+type SendState = { kind: "idle" } | { kind: "need-pass" } | { kind: "sending" } | { kind: "sent"; to: string } | { kind: "error"; message: string };
 export function OutreachDrafts(props: {
+  accountId: string;
   company: string;
   contactName: string | null;
   contactTitle: string;
@@ -48,6 +68,45 @@ export function OutreachDrafts(props: {
   const recipient = to.trim();
   const validTo = EMAIL_RE.test(recipient);
 
+  const [send, setSend] = useState<SendState>({ kind: "idle" });
+  const [pass, setPass] = useState("");
+
+  const doSend = async (passcode: string) => {
+    if (!validTo) {
+      setSend({ kind: "error", message: "Add the recipient\u2019s email address first." });
+      return;
+    }
+    setSend({ kind: "sending" });
+    try {
+      const res = await fetch("/api/outreach/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-send-passcode": passcode },
+        body: JSON.stringify({ accountId: props.accountId, to: recipient, subject, body }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        savePass(null);
+        setPass("");
+        setSend({ kind: "need-pass" });
+        return;
+      }
+      if (!res.ok) {
+        setSend({ kind: "error", message: data.error ?? "Couldn\u2019t send the email." });
+        return;
+      }
+      savePass(passcode);
+      setSend({ kind: "sent", to: recipient });
+    } catch {
+      setSend({ kind: "error", message: "Couldn\u2019t reach the server. Check your connection." });
+    }
+  };
+
+  const onSendClick = () => {
+    const saved = readPass();
+    if (saved) void doSend(saved);
+    else setSend({ kind: "need-pass" });
+  };
+
   const copy = async (what: string, text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -60,7 +119,6 @@ export function OutreachDrafts(props: {
 
   const toParam = validTo ? `&to=${encodeURIComponent(recipient)}` : "";
   const gmail = `https://mail.google.com/mail/?view=cm&fs=1${toParam}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  const mailto = `mailto:${validTo ? recipient : ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   const person = props.contactName ?? props.contactTitle;
   const linkedin = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${props.contactName ?? props.contactTitle} ${props.company}`)}`;
 
@@ -95,18 +153,33 @@ export function OutreachDrafts(props: {
           <textarea rows={10} value={body} onChange={(e) => setBody(e.target.value)} />
         </label>
         <div className="draft-actions">
-          <a className="btn btn-sm btn-primary" href={gmail} target="_blank" rel="noopener noreferrer">
-            {validTo ? "Send with Gmail" : "Open in Gmail"}
-          </a>
-          <a className="btn btn-sm" href={mailto}>{validTo ? "Send with mail app" : "Open in mail app"}</a>
+          <button type="button" className="btn btn-sm btn-primary" onClick={onSendClick} disabled={send.kind === "sending"}>
+            {send.kind === "sending" ? "Sending\u2026" : "Send"}
+          </button>
+          <a className="btn btn-sm btn-ghost" href={gmail} target="_blank" rel="noopener noreferrer">Open in Gmail</a>
           <button type="button" className="btn btn-sm btn-ghost" onClick={() => copy("email", `${validTo ? `To: ${recipient}\n` : ""}Subject: ${subject}\n\n${body}`)}>
             {copied === "email" ? "Copied" : "Copy email"}
           </button>
         </div>
-        <p className="small muted">
-          {validTo
-            ? "Opens a ready-to-send email to this address; press Send to deliver it from your account."
-            : "Add their email to send directly; without it, the draft opens with an empty recipient."}
+        {send.kind === "need-pass" && (
+          <form
+            className="send-pass"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (pass) void doSend(pass);
+            }}
+          >
+            <label className="field">
+              Send passcode
+              <input type="password" autoComplete="off" value={pass} onChange={(e) => setPass(e.target.value)} autoFocus />
+            </label>
+            <button type="submit" className="btn btn-sm btn-primary" disabled={!pass}>Confirm and send</button>
+          </form>
+        )}
+        <p className="send-status" aria-live="polite">
+          {send.kind === "sent" && <>Sent to {send.to}.</>}
+          {send.kind === "error" && <span className="field-error">{send.message}</span>}
+          {send.kind === "need-pass" && readPass() === "" && pass === "" && <span className="muted">Enter the passcode to send.</span>}
         </p>
       </div>
 

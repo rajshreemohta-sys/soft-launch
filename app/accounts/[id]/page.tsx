@@ -102,6 +102,7 @@ async function Analysis({ params }: { params: Promise<{ id: string }> }) {
                 label: "Outreach drafts",
                 content: insight ? (
                   <OutreachDrafts
+                    accountId={a.id}
                     company={a.company_name}
                     contactName={insight.best_contact.name}
                     contactTitle={insight.best_contact.title}

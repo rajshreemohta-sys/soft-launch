@@ -1562,6 +1562,23 @@ h3.display {
   width: 100%;
 }
 
+.send-pass {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.send-pass .field {
+  flex: 1;
+  min-width: 180px;
+}
+
+.send-status {
+  min-height: 20px;
+  font-size: 13px;
+}
+
 .field-error {
   color: var(--down);
   font-size: 12px;
