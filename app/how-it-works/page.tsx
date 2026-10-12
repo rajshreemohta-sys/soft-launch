@@ -32,6 +32,16 @@ export default function HowItWorksPage() {
 
       <section className="section">
         <h2 className="display" style={{ marginBottom: 24 }}>Components map</h2>
+        <a href="/components-map.jpg" className="map-image" target="_blank" rel="noopener">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/components-map.jpg"
+            width={3200}
+            height={2000}
+            alt="Components map: who does what. Steps 1 to 5 every morning: the web app starts a collect, live sources supply news, Gemini classifies triggers, the scoring engine scores every account, and Supabase saves results through a guarded RPC. Steps 6 to 10 on Monday and Thursday: the scoring engine picks the top 10, Gemini writes the outreach angle, Resend sends the Hot List to Arjun's inbox."
+          />
+        </a>
+        <p className="muted small" style={{ margin: "32px 0 16px" }}>The same system as a technical flow diagram:</p>
         <Mermaid chart={COMPONENTS_MAP} label="Components map: Vercel Cron triggers the collect route, which reads Google News, classifies with Gemini Flash, saves to Supabase, scores accounts and writes back through a guarded RPC. Twice a week the Hot List route asks Gemini Flash for outreach angles and emails Arjun through Resend. The dashboard reads from Supabase." />
       </section>
       <div className="rule" />

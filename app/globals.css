@@ -2122,3 +2122,7 @@ h3.display {
 :root[data-theme="dark"] .fact-strip {
   background: rgb(255 255 255 / 0.015);
 }
+
+/* Components map image on /how-it-works (source: docs/components-map.html) */
+.map-image { display: block; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+.map-image img { display: block; width: 100%; height: auto; }

@@ -31,6 +31,10 @@ ShiftSense:
 
 ## Components Map
 
+![ShiftSense components map: who does what, from trigger to output](public/components-map.jpg)
+
+Source: `docs/components-map.html` (rendered to `public/components-map.jpg`). The same system as a Mermaid flow:
+
 ```mermaid
 flowchart TB
   subgraph collect["1 · Collect: daily 6 AM IST, or Run collection now"]

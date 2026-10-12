@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ShiftSense · Components Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,700;6..12,800&display=swap" rel="stylesheet">
+<style>
+  /* Source for public/components-map.jpg. Render: npm run map:render */
+  :root {
+    --bg: #fcf4ea; --head: #3f2d24; --actor: #5c4537; --ink: #3a2a22; --sub: #6b5a50;
+    --people: #f6ddd4; --people-b: #cf6a55;
+    --app: #fdf9f3; --app-b: #d9c3a9;
+    --ai: #ebe5f7; --ai-b: #6c5bd6;
+    --rules: #f6e6c2; --rules-b: #b8862e;
+    --data: #e2ebe3; --data-b: #4f7a5c;
+    --out: #dfe6dc;
+    --cell: rgba(120, 90, 60, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 2000px; height: 1250px; background: var(--bg); color: var(--ink); font-family: "Nunito Sans", sans-serif; padding: 28px 56px 0; }
+  h1 { font-family: Fraunces, serif; font-weight: 600; font-size: 46px; text-align: center; letter-spacing: -0.01em; }
+  .lede { text-align: center; font-size: 21px; color: var(--sub); margin: 6px 0 20px; }
+  .grid { display: grid; grid-template-columns: 212px repeat(6, 1fr); border-radius: 18px; overflow: hidden; }
+  .h { background: var(--head); color: #fff; font-weight: 800; font-size: 21px; text-align: center; padding: 17px 0; }
+  .actor { background: var(--actor); color: #fff; text-align: center; display: flex; flex-direction: column; justify-content: center; padding: 12px; border-top: 1px solid rgba(255,255,255,0.12); }
+  .actor b { font-size: 21px; font-weight: 800; }
+  .actor span { font-size: 15px; opacity: 0.9; margin-top: 8px; line-height: 1.35; }
+  .c { border-left: 1px solid var(--cell); border-top: 1px solid var(--cell); padding: 8px 10px; display: flex; flex-direction: column; justify-content: center; gap: 7px; }
+  .people.c { background: var(--people); } .app.c { background: var(--app); } .ai.c { background: var(--ai); }
+  .rules.c { background: var(--rules); } .data.c { background: var(--data); } .out.c { background: var(--out); }
+  .card { background: rgba(255,255,255,0.78); border: 2px solid; border-radius: 12px; padding: 7px 12px 8px; }
+  .people.c .card { border-color: var(--people-b); } .app.c .card { border-color: var(--app-b); }
+  .ai.c .card { border-color: var(--ai-b); } .rules.c .card { border-color: var(--rules-b); }
+  .data.c .card { border-color: var(--data-b); } .out.c .card { border-color: var(--people-b); }
+  .t { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 9px; line-height: 1.2; }
+  .n { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--head); color: #fff; font-size: 14px; display: grid; place-items: center; }
+  .ai.c .n { background: var(--ai-b); }
+  .d { font-size: 14px; color: var(--sub); margin-top: 3px; line-height: 1.3; }
+  .foot { display: flex; justify-content: space-between; font-size: 17px; color: var(--sub); margin-top: 18px; }
+  .foot b { color: var(--ink); }
+  .legend { display: flex; gap: 22px; }
+  .legend i { display: inline-block; width: 15px; height: 15px; border: 2px solid; border-radius: 4px; vertical-align: -2px; margin-right: 6px; }
+</style>
+</head>
+<body>
+  <h1>ShiftSense · Components Map</h1>
+  <p class="lede">40 accounts watched every day: who does what, from a news headline to Arjun knowing who is worth a call this week</p>
+
+  <div class="grid">
+    <div class="h">Actor</div><div class="h">Trigger</div><div class="h">Input</div><div class="h">Context</div><div class="h">Processing</div><div class="h">AI</div><div class="h">Output</div>
+
+    <!-- Arjun -->
+    <div class="actor"><b>Arjun</b><span>sells ShiftSense<br>40 accounts · 4 deal stages</span></div>
+    <div class="people c"></div><div class="people c"></div>
+    <div class="people c"><div class="card"><div class="t">His columns</div><div class="d">stage, notes, last contact · read only</div></div></div>
+    <div class="people c"></div><div class="people c"></div>
+    <div class="people c"><div class="card"><div class="t"><span class="n">10</span>Hot List in his inbox</div><div class="d">top 10 with a summary + angle</div></div></div>
+
+    <!-- Web app -->
+    <div class="actor"><b>Web app</b><span>Next.js on Vercel<br>Vercel Cron · run buttons</span></div>
+    <div class="app c">
+      <div class="card"><div class="t"><span class="n">1</span>Daily collect</div><div class="d">6 + 7 AM IST, or Run collection now</div></div>
+      <div class="card"><div class="t"><span class="n">6</span>Hot List run</div><div class="d">Mon + Thu 8 AM IST, or Send now</div></div>
+    </div>
+    <div class="app c"></div>
+    <div class="app c"><div class="card"><div class="t">Product + taxonomy</div><div class="d">what ShiftSense does · 6 triggers</div></div></div>
+    <div class="app c"></div><div class="app c"></div><div class="app c"></div>
+
+    <!-- News sources -->
+    <div class="actor"><b>Live sources</b><span>Google News RSS<br>The Ken · Yahoo Finance</span></div>
+    <div class="data c"></div>
+    <div class="data c">
+      <div class="card"><div class="t"><span class="n">2</span>Fetches the news</div><div class="d">3 searches per company, last 7 days</div></div>
+    </div>
+    <div class="data c"></div><div class="data c"></div><div class="data c"></div><div class="data c"></div>
+
+    <!-- Gemini -->
+    <div class="actor"><b>Gemini API</b><span>gemini-3.8-flash<br>JSON with a schema</span></div>
+    <div class="ai c"></div><div class="ai c"></div><div class="ai c"></div><div class="ai c"></div>
+    <div class="ai c">
+      <div class="card"><div class="t"><span class="n">3</span>Classifies triggers</div><div class="d">same event? type? strength 1–10</div></div>
+      <div class="card"><div class="t"><span class="n">8</span>Writes the angle</div><div class="d">one-liner + angle that fits the stage</div></div>
+      <div class="card"><div class="t">Researches accounts</div><div class="d">web facts, leaders, outreach drafts</div></div>
+    </div>
+    <div class="ai c"></div>
+
+    <!-- Rules -->
+    <div class="actor"><b>Scoring engine</b><span>no AI · on the server</span></div>
+    <div class="rules c"></div><div class="rules c"></div><div class="rules c"></div>
+    <div class="rules c">
+      <div class="card"><div class="t"><span class="n">4</span>Scores every account</div><div class="d">strength × weight, halves weekly</div></div>
+      <div class="card"><div class="t"><span class="n">7</span>Picks the top 10</div><div class="d">fresh signal in last 3 days, by score</div></div>
+    </div>
+    <div class="rules c"></div><div class="rules c"></div>
+
+    <!-- Supabase -->
+    <div class="actor"><b>Supabase</b><span>memory · RLS on</span></div>
+    <div class="data c"></div><div class="data c"></div>
+    <div class="data c"><div class="card"><div class="t">Saved data</div><div class="d">seen articles · last 14 days of signals</div></div></div>
+    <div class="data c"><div class="card"><div class="t"><span class="n">5</span>Write RPC + guard</div><div class="d">trigger blocks Arjun's columns</div></div></div>
+    <div class="data c"></div><div class="data c"></div>
+
+    <!-- Output -->
+    <div class="actor"><b>Email + dashboard</b><span>Resend · Vercel</span></div>
+    <div class="out c"></div><div class="out c"></div><div class="out c"></div><div class="out c"></div><div class="out c"></div>
+    <div class="out c">
+      <div class="card"><div class="t"><span class="n">9</span>Sends the email</div><div class="d">via Resend · kept for the preview</div></div>
+      <div class="card"><div class="t">Dashboard</div><div class="d">heat, analysis, drafts to send</div></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div><b>1–5</b> every morning: fetch → classify → score → save &nbsp;·&nbsp; <b>6–10</b> Mon + Thu: rank → write → send</div>
+    <div class="legend">
+      <span><i style="border-color:var(--people-b)"></i>People</span>
+      <span><i style="border-color:var(--ai-b)"></i>AI</span>
+      <span><i style="border-color:var(--rules-b)"></i>Rules</span>
+      <span><i style="border-color:var(--data-b)"></i>Data</span>
+    </div>
+  </div>
+</body>
+</html>
