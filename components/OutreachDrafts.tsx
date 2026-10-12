@@ -36,10 +36,11 @@ export function OutreachDrafts(props: {
 
   return (
     <div className="drafts">
-      <p className="small muted">
+      <p className="small muted drafts-to">
         To: <strong className="ink">{props.contactName ? `${props.contactName}, ` : ""}{props.contactTitle}</strong>. Edit freely; nothing is sent until you send it yourself.
       </p>
 
+      <div className="drafts-grid">
       <div className="draft">
         <h4>Email</h4>
         <label className="field">
@@ -71,6 +72,7 @@ export function OutreachDrafts(props: {
           </button>
           <a className="btn btn-sm" href={linkedin} target="_blank" rel="noopener noreferrer">Find {person} on LinkedIn</a>
         </div>
+      </div>
       </div>
       {copied === "failed" && <p className="small muted">Your browser blocked copying; select the text and copy it manually.</p>}
     </div>

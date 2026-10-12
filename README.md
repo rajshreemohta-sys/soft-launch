@@ -115,7 +115,7 @@ On Vercel's free plan a cron can start anywhere within its hour.
 
 ### Account analysis
 
-Each account page (`app/accounts/[id]/page.tsx`) is a full brief on the company:
+Each account page (`app/accounts/[id]/page.tsx`) is a full brief on the company: a header with the lead-temperature gauge, a strip of key facts (founded, headquarters, workforce, revenue, share price), and tabs for **Trigger**, **Signal analysis**, **Outreach drafts**, **Recent news** and **Company**, with Arjun's notes pinned alongside. A tab can be linked directly, e.g. `/accounts/<id>#drafts`.
 
 - **Lead temperature** (`lib/heat.ts`): the score mapped to 0–100 with diminishing returns (`100 × (1 − e^(−score/12))`), banded Hot ≥ 65, Warm ≥ 35, Cool > 0, Cold. Shown as gauges and meters in one hue, light to dark.
 - **Company facts** (`lib/profile.ts`): Gemini Flash with **Google Search grounding** researches founding year, headquarters, listing and NSE symbol (or the listed parent's), latest financials, the annual report, and senior leadership. A second Gemini call extracts structured facts *only* from those notes. Grounding sources are resolved to real URLs and stored with the profile; the newest annual-report PDF among them is linked. Refreshed every 14 days, using spare time after the morning collect.

@@ -4,9 +4,10 @@ import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { Gauge, StockChart } from "@/components/Charts";
 import { OutreachDrafts } from "@/components/OutreachDrafts";
+import { Tabs } from "@/components/Tabs";
 import { SignalTag, StageTag } from "@/components/Tag";
 import { getAccount, getInsight, getProfile, type Signal } from "@/lib/data";
-import { formatDate, formatDateLong, formatScore, hostname, sourceLabel } from "@/lib/format";
+import { formatDate, formatDateLong, formatScore, hostname, shortWorkforce, sourceLabel } from "@/lib/format";
 import { heatBand, heatIndex } from "@/lib/heat";
 import { generateInsight, insightIsStale, type Insight } from "@/lib/insights";
 import { getRecentNews, getStock } from "@/lib/live";
@@ -42,94 +43,98 @@ async function Analysis({ params }: { params: Promise<{ id: string }> }) {
   }
 
   const heat = heatIndex(Number(a.signal_score));
-  const lead = signals[0];
+  const news = getRecentNews(a.search_terms); // started now, awaited inside its tab
 
   return (
     <>
-      <section className="section analysis-head">
+      <section className="section account-head">
         <div>
           <Link href="/accounts" className="back">{"←"} All accounts</Link>
           <h1 className="display" style={{ marginTop: 16 }}>{a.company_name}</h1>
           <p className="facts-line">
             <span>{a.sector}</span>
-            {profile?.founded_year && <span>Founded {profile.founded_year}</span>}
-            {profile?.headquarters && <span>{profile.headquarters}</span>}
             {profile?.nse_symbol && <span>{profile.listed ? "NSE" : "Parent on NSE"}: {profile.nse_symbol}</span>}
             {profile && !profile.listed && !profile.nse_symbol && <span>Private company</span>}
           </p>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+          <div className="head-pills">
             <StageTag stage={a.deal_stage} />
             {a.hot_rank && <span className="stage">#{a.hot_rank} on the Hot List</span>}
+            {signals[0] && <SignalTag type={signals[0].signal_type} />}
           </div>
         </div>
-        <div className="head-gauge">
-          <Gauge value={heat} size={220} label="Lead temperature" sublabel={`Signal score ${formatScore(a.signal_score)}`} />
-        </div>
+        <Gauge value={heat} size={200} label="Lead temperature" sublabel={`Signal score ${formatScore(a.signal_score)}`} />
+      </section>
+
+      <section className="section section-tight" style={{ paddingTop: 0 }}>
+        <dl className="fact-strip">
+          <div><dt>Founded</dt><dd>{profile?.founded_year ?? "—"}</dd></div>
+          <div><dt>Headquarters</dt><dd>{profile?.headquarters ?? "—"}</dd></div>
+          <div><dt>Workforce</dt><dd>{shortWorkforce(profile?.employees)}</dd></div>
+          <div>
+            <dt>Revenue{profile?.financials.fiscal_year ? ` (${shortFy(profile.financials.fiscal_year)})` : ""}</dt>
+            <dd>{profile?.financials.revenue ?? "Not disclosed"}</dd>
+          </div>
+          <div>
+            <dt>Share price</dt>
+            <dd>
+              {profile?.nse_symbol ? (
+                <Suspense fallback={"…"}>
+                  <PriceTile symbol={profile.nse_symbol} />
+                </Suspense>
+              ) : (
+                "Not listed"
+              )}
+            </dd>
+          </div>
+        </dl>
       </section>
       <div className="rule" />
 
       <section className="section">
-        <div className="analysis">
-          <div className="analysis-main">
-            <WhyNow insight={insight} lead={lead} signals={signals} />
-            <AiRead insight={insight} a={a} />
-            {insight && (
-              <Card title="Outreach drafts" id="drafts">
-                <OutreachDrafts
-                  company={a.company_name}
-                  contactName={insight.best_contact.name}
-                  contactTitle={insight.best_contact.title}
-                  subject={insight.email.subject}
-                  body={insight.email.body}
-                  linkedinNote={insight.linkedin_note}
-                />
-              </Card>
-            )}
-            <Card title="Recent news" id="news">
-              <Suspense fallback={<p className="muted small">Fetching the latest headlines…</p>}>
-                <RecentNews terms={a.search_terms} />
-              </Suspense>
-            </Card>
-          </div>
+        <div className="account-body">
+          <Tabs
+            label={`${a.company_name} analysis`}
+            tabs={[
+              { id: "trigger", label: "Trigger", count: signals.length, content: <TriggerTab insight={insight} signals={signals} /> },
+              { id: "analysis", label: "Signal analysis", content: <AnalysisTab insight={insight} a={a} /> },
+              {
+                id: "drafts",
+                label: "Outreach drafts",
+                content: insight ? (
+                  <OutreachDrafts
+                    company={a.company_name}
+                    contactName={insight.best_contact.name}
+                    contactTitle={insight.best_contact.title}
+                    subject={insight.email.subject}
+                    body={insight.email.body}
+                    linkedinNote={insight.linkedin_note}
+                  />
+                ) : (
+                  <p className="muted">Drafts are being prepared. Refresh in a minute.</p>
+                ),
+              },
+              {
+                id: "news",
+                label: "Recent news",
+                content: (
+                  <Suspense fallback={<p className="muted small">Fetching the latest headlines…</p>}>
+                    <NewsTab news={news} />
+                  </Suspense>
+                ),
+              },
+              { id: "company", label: "Company", content: <CompanyTab profile={profile} sources={sources} company={a.company_name} refreshedAt={profileRow?.refreshed_at} /> },
+            ]}
+          />
 
-          <aside className="analysis-side">
-            <section className="panel panel-arjun" aria-labelledby="arjun-h">
-              <h2 id="arjun-h" className="card-title">Arjun&rsquo;s notes</h2>
-              <p className="panel-note">Arjun owns this panel. The system never edits it.</p>
-              <dl className="facts">
-                <div><dt>Deal stage</dt><dd><StageTag stage={a.deal_stage} /></dd></div>
-                <div><dt>Notes</dt><dd>{a.arjun_notes || "—"}</dd></div>
-                <div><dt>Last contact</dt><dd>{formatDateLong(a.last_contact_date)}</dd></div>
-                <div><dt>Relationship read</dt><dd>{a.relationship_read || "—"}</dd></div>
-              </dl>
-            </section>
-
-            <CompanyCard profile={profile} />
-
-            {profile?.nse_symbol && (
-              <Card title="Share price" note={`${profile.listed ? "" : "Listed parent, "}NSE: ${profile.nse_symbol}`}>
-                <Suspense fallback={<p className="muted small">Loading the price…</p>}>
-                  <Stock symbol={profile.nse_symbol} />
-                </Suspense>
-              </Card>
-            )}
-
-            <Financials profile={profile} sources={sources} />
-            <Leadership profile={profile} company={a.company_name} />
-
-            {sources.length > 0 && (
-              <details className="sources">
-                <summary>Research sources ({sources.length})</summary>
-                <ul>
-                  {sources.map((s) => (
-                    <li key={s.url}>
-                      <a href={s.url} target="_blank" rel="noopener noreferrer">{s.title || hostname(s.url)}</a>
-                    </li>
-                  ))}
-                </ul>
-                <p className="small muted">Company facts researched by Gemini Flash with Google Search{profileRow ? `, ${formatDate(profileRow.refreshed_at)}` : ""}. Verify before contacting anyone.</p>
-              </details>
-            )}
+          <aside className="panel panel-arjun account-notes" aria-labelledby="arjun-h">
+            <h2 id="arjun-h" className="card-title">Arjun&rsquo;s notes</h2>
+            <p className="panel-note">Arjun owns this panel. The system never edits it.</p>
+            <dl className="facts">
+              <div><dt>Deal stage</dt><dd><StageTag stage={a.deal_stage} /></dd></div>
+              <div><dt>Notes</dt><dd>{a.arjun_notes || "—"}</dd></div>
+              <div><dt>Last contact</dt><dd>{formatDateLong(a.last_contact_date)}</dd></div>
+              <div><dt>Relationship read</dt><dd>{a.relationship_read || "—"}</dd></div>
+            </dl>
           </aside>
         </div>
       </section>
@@ -137,159 +142,200 @@ async function Analysis({ params }: { params: Promise<{ id: string }> }) {
   );
 }
 
-function Card({ title, note, id, children }: { title: string; note?: string; id?: string; children: React.ReactNode }) {
-  return (
-    <section className="card" aria-labelledby={id ? `${id}-h` : undefined}>
-      <div className="card-head">
-        <h2 id={id ? `${id}-h` : undefined} className="card-title">{title}</h2>
-        {note && <span className="small muted">{note}</span>}
-      </div>
-      {children}
-    </section>
-  );
+// "FY 2025–26 (ended March 31, 2026)" -> "FY 2025–26"
+function shortFy(fy: string): string {
+  return fy.replace(/\s*\(.*\)\s*/, "").trim();
 }
 
-function WhyNow({ insight, lead, signals }: { insight: Insight | null; lead?: Signal; signals: Signal[] }) {
-  return (
-    <Card title="Why now: the trigger" id="why">
-      {lead ? (
-        <>
-          {insight && <p className="lead-text">{insight.why_now}</p>}
-          <ol className="timeline">
-            {signals.slice(0, 6).map((s) => (
-              <li key={s.id}>
-                <div className="timeline-head">
-                  <SignalTag type={s.signal_type} />
-                  <span>{formatDate(s.published_at)}</span>
-                  <span>Strength {s.strength}/10</span>
-                </div>
-                <p>{s.summary}</p>
-                <a className="small" href={s.source_url} target="_blank" rel="noopener noreferrer">
-                  {s.source_title ?? "Source"} ({sourceLabel(s.source_name, s.source_url)})
-                </a>
-              </li>
-            ))}
-          </ol>
-        </>
-      ) : (
-        <p className="muted">No trigger events found yet. This account stays cold until news appears.</p>
-      )}
-    </Card>
-  );
-}
+// ---------------------------------------------------------------- tabs
 
-function AiRead({ insight, a }: { insight: Insight | null; a: Account }) {
-  const band = heatBand(heatIndex(Number(a.signal_score)));
+function TriggerTab({ insight, signals }: { insight: Insight | null; signals: Signal[] }) {
+  if (!signals.length) {
+    return <p className="muted">No trigger events found yet. This account stays cold until news appears.</p>;
+  }
   return (
-    <Card title="What the AI says" note="Gemini Flash" id="ai">
-      {insight ? (
-        <div className="ai-read">
-          <p className="lead-text">
-            <span className={`heat-chip heat-${band.toLowerCase()}`}>{band}</span> {insight.verdict}
-          </p>
-          {a.outreach_angle && (
-            <p className="angle"><span className="angle-label">Hot List outreach angle</span>{a.outreach_angle}</p>
-          )}
-          <div className="ai-cols">
-            <div>
-              <h3>How to approach</h3>
-              <ol>{insight.approach.map((s) => <li key={s}>{s}</li>)}</ol>
-            </div>
-            <div>
-              <h3>Talking points</h3>
-              <ul>{insight.talking_points.map((s) => <li key={s}>{s}</li>)}</ul>
-            </div>
-          </div>
-          <div className="ai-cols">
-            <div>
-              <h3>Contact first</h3>
-              <p>
-                <strong>{insight.best_contact.name ?? insight.best_contact.title}</strong>
-                {insight.best_contact.name && <span className="muted">, {insight.best_contact.title}</span>}
-              </p>
-              <p className="small muted">{insight.best_contact.why}</p>
-            </div>
-            <div>
-              <h3>Be ready for</h3>
-              <ul>{insight.risks.map((s) => <li key={s}>{s}</li>)}</ul>
-            </div>
-          </div>
+    <div className="tab-stack">
+      {insight && (
+        <div className="callout">
+          <span className="callout-label">Why now</span>
+          <p>{insight.why_now}</p>
         </div>
-      ) : (
-        <p className="muted">The AI read is being prepared. Refresh in a minute.</p>
       )}
-    </Card>
-  );
-}
-
-function CompanyCard({ profile }: { profile: CompanyProfile | null }) {
-  if (!profile) return null;
-  return (
-    <Card title="Company">
-      <p className="small">{profile.business_summary}</p>
-      <dl className="facts facts-grid">
-        <div><dt>Founded</dt><dd>{profile.founded_year ?? "—"}</dd></div>
-        <div><dt>Headquarters</dt><dd>{profile.headquarters ?? "—"}</dd></div>
-        <div><dt>Workforce</dt><dd>{profile.employees ?? "—"}</dd></div>
-        <div><dt>Ownership</dt><dd>{profile.listed ? "Listed" : profile.parent_company ? `Part of ${profile.parent_company}` : "Private"}</dd></div>
-      </dl>
-    </Card>
-  );
-}
-
-function Financials({ profile, sources }: { profile: CompanyProfile | null; sources: Source[] }) {
-  if (!profile) return null;
-  const f = profile.financials;
-  const report = reportLink(sources);
-  return (
-    <Card title="Financials" note={f.fiscal_year ?? undefined}>
-      <dl className="facts facts-grid">
-        <div><dt>Revenue</dt><dd>{f.revenue ?? "Not disclosed"}</dd></div>
-        <div><dt>Net profit</dt><dd>{f.net_profit ?? "Not disclosed"}</dd></div>
-      </dl>
-      {f.note && <p className="small muted" style={{ marginTop: 10 }}>{f.note}</p>}
-      {report ? (
-        <p style={{ marginTop: 12 }}>
-          <a className="btn btn-sm btn-ghost" href={report.url} target="_blank" rel="noopener noreferrer">
-            {/\.pdf/i.test(report.url) ? "Annual report (PDF)" : "Investor relations"}
-          </a>
-        </p>
-      ) : (
-        <p className="small muted" style={{ marginTop: 10 }}>
-          {profile.listed || profile.nse_symbol ? "No annual report link found in the research sources." : "Private company: no public balance sheet. Figures are from filings reported in the news."}
-        </p>
-      )}
-    </Card>
-  );
-}
-
-function Leadership({ profile, company }: { profile: CompanyProfile | null; company: string }) {
-  if (!profile?.leaders.length) return null;
-  return (
-    <Card title="Senior leadership">
-      <ul className="people">
-        {profile.leaders.map((l) => (
-          <li key={l.name + l.title}>
-            <div>
-              <strong>{l.name}</strong>
-              <span className="small muted">{l.title}</span>
+      <ol className="trigger-list">
+        {signals.map((s) => (
+          <li key={s.id}>
+            <div className="trigger-meta">
+              <span className="trigger-date">{formatDate(s.published_at)}</span>
+              <SignalTag type={s.signal_type} />
+              <span className="strength" title={`Strength ${s.strength} of 10`}>
+                <span className="strength-bar"><span style={{ width: `${s.strength * 10}%` }} /></span>
+                {s.strength}/10
+              </span>
             </div>
-            <a
-              className="small"
-              href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${l.name} ${company}`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              LinkedIn
+            <p className="trigger-summary">{s.summary}</p>
+            {s.reasoning && <p className="small muted">{s.reasoning}</p>}
+            <a className="small" href={s.source_url} target="_blank" rel="noopener noreferrer">
+              {sourceLabel(s.source_name, s.source_url)}
             </a>
           </li>
         ))}
-      </ul>
-    </Card>
+      </ol>
+    </div>
   );
 }
 
-async function Stock({ symbol }: { symbol: string }) {
+function AnalysisTab({ insight, a }: { insight: Insight | null; a: Account }) {
+  if (!insight) return <p className="muted">The signal analysis is being prepared. Refresh in a minute.</p>;
+  const band = heatBand(heatIndex(Number(a.signal_score)));
+  return (
+    <div className="tab-stack">
+      <div className="callout">
+        <span className="callout-label">
+          <span className={`heat-chip heat-${band.toLowerCase()}`}>{band}</span> Verdict
+        </span>
+        <p>{insight.verdict}</p>
+      </div>
+      {a.outreach_angle && (
+        <div className="callout callout-plain">
+          <span className="callout-label">Hot List outreach angle</span>
+          <p>{a.outreach_angle}</p>
+        </div>
+      )}
+      <div className="analysis-grid">
+        <section>
+          <h3>How to approach</h3>
+          <ol>{insight.approach.map((s) => <li key={s}>{s}</li>)}</ol>
+        </section>
+        <section>
+          <h3>Talking points</h3>
+          <ul>{insight.talking_points.map((s) => <li key={s}>{s}</li>)}</ul>
+        </section>
+        <section>
+          <h3>Contact first</h3>
+          <p>
+            <strong>{insight.best_contact.name ?? insight.best_contact.title}</strong>
+            {insight.best_contact.name && <span className="muted">, {insight.best_contact.title}</span>}
+          </p>
+          <p className="small muted" style={{ marginTop: 6 }}>{insight.best_contact.why}</p>
+        </section>
+        <section>
+          <h3>Be ready for</h3>
+          <ul>{insight.risks.map((s) => <li key={s}>{s}</li>)}</ul>
+        </section>
+      </div>
+      <p className="small muted">Written by Gemini Flash from the trigger events, company facts and Arjun&rsquo;s notes.</p>
+    </div>
+  );
+}
+
+async function NewsTab({ news }: { news: ReturnType<typeof getRecentNews> }) {
+  const items = await news;
+  if (!items.length) return <p className="muted">No coverage in the last 14 days.</p>;
+  return (
+    <ul className="news">
+      {items.map((n) => (
+        <li key={n.url}>
+          <span className="news-date">{formatDate(n.publishedAt)}</span>
+          <span>
+            <a href={n.url} target="_blank" rel="noopener noreferrer">{n.title}</a>
+            <span className="small muted"> · {sourceLabel(n.source, n.url)}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function CompanyTab({ profile, sources, company, refreshedAt }: { profile: CompanyProfile | null; sources: Source[]; company: string; refreshedAt?: string }) {
+  if (!profile) return <p className="muted">Company research is still running for this account.</p>;
+  const f = profile.financials;
+  const report = reportLink(sources);
+  return (
+    <div className="tab-stack">
+      <p>{profile.business_summary}</p>
+      <div className="company-grid">
+        <section className="mini-card">
+          <h3>Financials{f.fiscal_year ? <span className="muted"> · {shortFy(f.fiscal_year)}</span> : null}</h3>
+          <dl className="facts facts-grid">
+            <div><dt>Revenue</dt><dd>{f.revenue ?? "Not disclosed"}</dd></div>
+            <div><dt>Net profit</dt><dd>{f.net_profit ?? "Not disclosed"}</dd></div>
+          </dl>
+          {f.note && <p className="small muted" style={{ marginTop: 10 }}>{f.note}</p>}
+          {report ? (
+            <a className="btn btn-sm btn-ghost" style={{ marginTop: 14 }} href={report.url} target="_blank" rel="noopener noreferrer">
+              {/\.pdf/i.test(report.url) ? "Annual report (PDF)" : "Investor relations"}
+            </a>
+          ) : (
+            <p className="small muted" style={{ marginTop: 10 }}>
+              {profile.listed || profile.nse_symbol ? "No annual report link in the research sources." : "Private company: no public balance sheet. Figures are from filings reported in the news."}
+            </p>
+          )}
+        </section>
+
+        {profile.nse_symbol && (
+          <section className="mini-card">
+            <h3>Share price<span className="muted"> · {profile.listed ? "" : "listed parent, "}NSE: {profile.nse_symbol}</span></h3>
+            <Suspense fallback={<p className="muted small">Loading the price…</p>}>
+              <StockPanel symbol={profile.nse_symbol} />
+            </Suspense>
+          </section>
+        )}
+      </div>
+
+      <section className="mini-card">
+        <h3>Senior leadership</h3>
+        <ul className="people people-grid">
+          {profile.leaders.map((l) => (
+            <li key={l.name + l.title}>
+              <div>
+                <strong>{l.name}</strong>
+                <span className="small muted">{l.title}</span>
+              </div>
+              <a
+                className="small"
+                href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${l.name} ${company}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                LinkedIn
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {sources.length > 0 && (
+        <details className="sources">
+          <summary>Research sources ({sources.length})</summary>
+          <ul>
+            {sources.map((s) => (
+              <li key={s.url}>
+                <a href={s.url} target="_blank" rel="noopener noreferrer">{s.title || hostname(s.url)}</a>
+              </li>
+            ))}
+          </ul>
+          <p className="small muted">
+            Researched by Gemini Flash with Google Search{refreshedAt ? `, ${formatDate(refreshedAt)}` : ""}. Check names and titles before contacting anyone.
+          </p>
+        </details>
+      )}
+    </div>
+  );
+}
+
+async function PriceTile({ symbol }: { symbol: string }) {
+  const s = await getStock(symbol);
+  if (!s) return <>Unavailable</>;
+  const up = s.changePct >= 0;
+  return (
+    <>
+      {new Intl.NumberFormat("en-IN", { style: "currency", currency: s.currency, maximumFractionDigits: 0 }).format(s.price)}{" "}
+      <span className={up ? "delta-up" : "delta-down"}>{up ? "+" : ""}{s.changePct.toFixed(0)}%</span>
+    </>
+  );
+}
+
+async function StockPanel({ symbol }: { symbol: string }) {
   const s = await getStock(symbol);
   if (!s) return <p className="small muted">Price unavailable right now.</p>;
   const fmt = new Intl.NumberFormat("en-IN", { style: "currency", currency: s.currency, maximumFractionDigits: 2 });
@@ -305,20 +351,5 @@ async function Stock({ symbol }: { symbol: string }) {
       </p>
       <StockChart points={s.points} currency={s.currency} />
     </>
-  );
-}
-
-async function RecentNews({ terms }: { terms: string[] }) {
-  const news = await getRecentNews(terms);
-  if (!news.length) return <p className="muted small">No coverage in the last 14 days.</p>;
-  return (
-    <ul className="news">
-      {news.map((n) => (
-        <li key={n.url}>
-          <a href={n.url} target="_blank" rel="noopener noreferrer">{n.title}</a>
-          <span className="small muted">{sourceLabel(n.source, n.url)} · {formatDate(n.publishedAt)}</span>
-        </li>
-      ))}
-    </ul>
   );
 }

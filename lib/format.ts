@@ -50,3 +50,13 @@ export function sourceLabel(name: string | null | undefined, url?: string | null
   if (name && !/^https?:\/\//i.test(name)) return name;
   return hostname(name) || hostname(url) || "Source";
 }
+
+// "Approximately 27,700 to 40,700+ employees (standalone...)" -> "~27,700 to 40,700+"
+export function shortWorkforce(value: string | null | undefined): string {
+  if (!value) return "\u2014";
+  return value
+    .replace(/\s*\(.*$/, "")
+    .replace(/^(approximately|approx\.?|around|about|over)\s+/i, "~")
+    .replace(/\s+(employees|staff|people|workers)\b.*$/i, "")
+    .trim();
+}
