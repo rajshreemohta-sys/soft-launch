@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { linkedInPeopleSearch, linkedInWebSearch } from "@/lib/linkedin";
 
 const LINKEDIN_LIMIT = 300;
 
@@ -120,7 +121,10 @@ export function OutreachDrafts(props: {
   const toParam = validTo ? `&to=${encodeURIComponent(recipient)}` : "";
   const gmail = `https://mail.google.com/mail/?view=cm&fs=1${toParam}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   const person = props.contactName ?? props.contactTitle;
-  const linkedin = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${props.contactName ?? props.contactTitle} ${props.company}`)}`;
+  // Named contact: LinkedIn people search by name. Role only: web search for the role at the company.
+  const linkedin = props.contactName
+    ? linkedInPeopleSearch(props.contactName)
+    : linkedInWebSearch(props.contactTitle, props.company);
 
   return (
     <div className="drafts">
@@ -194,6 +198,11 @@ export function OutreachDrafts(props: {
             {copied === "note" ? "Copied" : "Copy note"}
           </button>
           <a className="btn btn-sm" href={linkedin} target="_blank" rel="noopener noreferrer">Find {person} on LinkedIn</a>
+          {props.contactName && (
+            <a className="btn btn-sm btn-ghost" href={linkedInWebSearch(props.contactName, props.company)} target="_blank" rel="noopener noreferrer">
+              Search the web
+            </a>
+          )}
         </div>
       </div>
       </div>

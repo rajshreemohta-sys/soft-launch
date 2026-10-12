@@ -11,6 +11,7 @@ import { formatDate, formatDateLong, formatScore, hostname, shortWorkforce, sour
 import { heatBand, heatIndex } from "@/lib/heat";
 import { generateInsight, insightIsStale, type Insight } from "@/lib/insights";
 import { getRecentNews, getStock } from "@/lib/live";
+import { linkedInPeopleSearch, linkedInWebSearch } from "@/lib/linkedin";
 import { reportLink, type CompanyProfile, type Source } from "@/lib/profile";
 import type { Account } from "@/lib/supabase";
 
@@ -296,14 +297,14 @@ function CompanyTab({ profile, sources, company, refreshedAt }: { profile: Compa
                 <strong>{l.name}</strong>
                 <span className="small muted">{l.title}</span>
               </div>
-              <a
-                className="small"
-                href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${l.name} ${company}`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                LinkedIn
-              </a>
+              <span className="person-links">
+                <a className="btn btn-sm btn-ghost" href={linkedInPeopleSearch(l.name)} target="_blank" rel="noopener noreferrer">
+                  LinkedIn
+                </a>
+                <a className="small" href={linkedInWebSearch(l.name, company)} target="_blank" rel="noopener noreferrer" title="Search the web for this person's LinkedIn profile">
+                  Web
+                </a>
+              </span>
             </li>
           ))}
         </ul>

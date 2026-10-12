@@ -1621,6 +1621,13 @@ h3.display {
   display: grid;
 }
 
+.person-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
 .stock-head {
   display: flex;
   align-items: baseline;
