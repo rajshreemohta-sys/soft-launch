@@ -107,8 +107,8 @@ On Vercel's free plan a cron can start anywhere within its hour.
 
 | Page | Shows |
 |---|---|
-| `/` | Hot/warm/cool/cold counts, gauges for the hottest leads, charts (triggers per day, triggers by type, pipeline temperature by deal stage), and the Hot List as a horizontal row of ranked boxes (scroll or use the arrows) |
-| `/accounts` | All 40 accounts in a sortable, filterable table with a temperature meter; quiet accounts greyed at the bottom |
+| `/` | Hot/warm/cool/cold counts, a temperature ladder of the 8 hottest leads, charts (triggers per day, triggers by type, pipeline temperature by deal stage), and the Hot List as a horizontal row of ranked boxes (scroll or use the arrows) |
+| `/accounts` | Accounts with a trigger in the last 30 days in a sortable, filterable table with a temperature meter; quiet accounts below as tiles showing deal stage, last contact, revenue and HR lead, so all 40 stay visible |
 | `/accounts/[id]` | Full analysis (see below), with "Arjun's notes" in its own panel that the system never edits |
 | `/how-it-works` | Components Map, trigger taxonomy, scoring, protection, account analysis, limitations (linked in the footer) |
 | `/hotlist/preview` | The latest email as sent (or as built in dry-run mode) (linked in the footer) |
@@ -117,7 +117,8 @@ On Vercel's free plan a cron can start anywhere within its hour.
 
 Each account page (`app/accounts/[id]/page.tsx`) is a full brief on the company: a header with the lead-temperature gauge, a strip of key facts (founded, headquarters, workforce, revenue, share price), and tabs for **Trigger**, **Signal analysis**, **Outreach drafts**, **Recent news** and **Company**, with Arjun's notes pinned alongside. A tab can be linked directly, e.g. `/accounts/<id>#drafts`.
 
-- **Lead temperature** (`lib/heat.ts`): the score mapped to 0–100 with diminishing returns (`100 × (1 − e^(−score/12))`), banded Hot ≥ 65, Warm ≥ 35, Cool > 0, Cold. Shown as gauges and meters in one hue, light to dark.
+- **Lead temperature** (`lib/heat.ts`): the score mapped to 0–100 with diminishing returns (`100 × (1 − e^(−score/12))`), banded Hot ≥ 65, Warm ≥ 35, Cool > 0, Cold. Shown as gauges, meters and a temperature ladder on a heat scale (neutral → amber → orange → red), always with the number and band printed.
+- **Light and dark mode:** follows the device setting; the switch in the header overrides it and is remembered on that device.
 - **Company facts** (`lib/profile.ts`): Gemini Flash with **Google Search grounding** researches founding year, headquarters, listing and NSE symbol (or the listed parent's), latest financials, the annual report, and senior leadership. A second Gemini call extracts structured facts *only* from those notes. Grounding sources are resolved to real URLs and stored with the profile; the newest annual-report PDF among them is linked. Refreshed every 14 days, using spare time after the morning collect.
 - **Share price** (`lib/live.ts`): six months of NSE closes from Yahoo Finance, cached for an hour.
 - **Recent news**: the last 14 days from the same Google News search, cached for an hour.

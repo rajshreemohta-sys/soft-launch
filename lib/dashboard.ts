@@ -57,7 +57,7 @@ export async function getDashboard() {
   return {
     entries,
     bandCounts,
-    hottest: withHeat.filter((x) => x.heat > 0).slice(0, 6),
+    hottest: withHeat.filter((x) => x.heat > 0).slice(0, 8),
     newThisWeek: signals.filter((s) => now.getTime() - new Date(s.published_at).getTime() <= 7 * 86_400_000).length,
     nextHotList: nextHotList(now),
     days,

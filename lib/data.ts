@@ -188,3 +188,15 @@ export async function getRecentSignals(days: number): Promise<Signal[]> {
   if (error) throw error;
   return (data ?? []) as Signal[];
 }
+
+// Lightweight profile fields for the accounts list (revenue and first-listed leader).
+export async function getProfileSummaries(): Promise<Map<string, { revenue: string | null; leader: string | null }>> {
+  const { data, error } = await supabaseAdmin().from("company_profiles").select("account_id, profile");
+  if (error) throw error;
+  const map = new Map<string, { revenue: string | null; leader: string | null }>();
+  for (const row of (data ?? []) as { account_id: string; profile: CompanyProfile }[]) {
+    const l = row.profile.leaders?.[0];
+    map.set(row.account_id, { revenue: row.profile.financials?.revenue ?? null, leader: l ? `${l.name}, ${l.title}` : null });
+  }
+  return map;
+}

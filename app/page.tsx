@@ -2,10 +2,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { Carousel } from "@/components/Carousel";
-import { Gauge, MiniGauge, SignalsPerDay, StageTemperature, TriggersByType, TYPE_COLOR } from "@/components/Charts";
+import { TemperatureLadder } from "@/components/TemperatureLadder";
+import { MiniGauge, SignalsPerDay, StageTemperature, TriggersByType, TYPE_COLOR } from "@/components/Charts";
 import { SignalTag, StageTag } from "@/components/Tag";
 import { getDashboard } from "@/lib/dashboard";
-import { DEAL_STAGE_LABELS } from "@/lib/format";
 import { HEAT_BANDS, heatBand, heatIndex } from "@/lib/heat";
 import type { SignalType } from "@/lib/taxonomy";
 import { HOT_LIST_WINDOW_DAYS } from "@/lib/site";
@@ -53,14 +53,13 @@ async function Dashboard() {
       {hottest.length > 0 && (
         <>
           <section className="section">
-            <h2 className="display section-title">Hottest right now</h2>
-            <div className="gauges">
-              {hottest.map(({ a, heat }) => (
-                <Link key={a.id} href={`/accounts/${a.id}`} className="gauge-card">
-                  <Gauge value={heat} label={a.company_name} sublabel={DEAL_STAGE_LABELS[a.deal_stage ?? ""] ?? ""} />
-                </Link>
-              ))}
+            <div className="section-head">
+              <h2 className="display section-title">Hottest right now</h2>
+              <p className="muted small">Top 8 by lead temperature. The marker shows where each sits from cold to hot.</p>
             </div>
+            <TemperatureLadder
+              rows={hottest.map(({ a, heat }) => ({ id: a.id, name: a.company_name, stage: a.deal_stage, heat, signalType: a.latest_signal_type }))}
+            />
           </section>
           <div className="rule" />
         </>
@@ -113,7 +112,7 @@ async function Dashboard() {
                   </span>
                   <span className="hot-pills"><SignalTag type={signal.signal_type} /></span>
                   <span className="hot-summary">{signal.summary}</span>
-                  <span className="hot-cta">Open analysis</span>
+                  <span className="hot-cta btn btn-sm btn-ghost">Open analysis</span>
                 </Link>
               );
             })}

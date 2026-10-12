@@ -60,3 +60,21 @@ export function shortWorkforce(value: string | null | undefined): string {
     .replace(/\s+(employees|staff|people|workers)\b.*$/i, "")
     .trim();
 }
+
+// "Approximately ₹1,380 crore (~US$ 142.6 million)" -> "~₹1,380 cr"
+export function shortRevenue(value: string | null | undefined): string {
+  if (!value) return "\u2014";
+  // "₹79,803 million" -> "₹7,980 cr" (1 crore = 10 million)
+  const million = value.match(/(?:\u20b9|Rs\.?\s*)([\d,]+(?:\.\d+)?)\s*million/i);
+  if (million) {
+    const crore = Number(million[1].replace(/,/g, "")) / 10;
+    return `\u20b9${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(crore)} cr`;
+  }
+  return value
+    .split(" / ")[0]
+    .replace(/\s*\(.*$/, "")
+    .replace(/^(approximately|approx\.?|around|about)\s+/i, "~")
+    .replace(/\bRs\.?\s*/g, "\u20b9")
+    .replace(/\s*crore\b.*$/i, " cr")
+    .trim();
+}

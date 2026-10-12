@@ -19,7 +19,7 @@ export function heatBand(heat: number): HeatBand {
 
 export const HEAT_BANDS: HeatBand[] = ["Hot", "Warm", "Cool", "Cold"];
 
-// One hue, sequential: hotter bands are stronger steps of terracotta. CSS variables, so
+// Sequential heat scale (neutral -> amber -> orange -> red). CSS variables, so
 // the dark theme can supply its own ramp (brightest = hottest on a dark surface).
 export const HEAT_COLORS: Record<HeatBand, string> = {
   Hot: "var(--heat-hot)",

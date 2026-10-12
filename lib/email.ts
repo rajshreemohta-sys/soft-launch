@@ -31,7 +31,7 @@ export type WarmEntry = {
 const C = {
   green: "#3D6549",
   sage: "#6E8761",
-  terracotta: "#DE8C68",
+  blue: "#4F78A8",
   mauve: "#A3829A",
   cream: "#EFEBE1",
   ink: "#000000",
@@ -42,7 +42,7 @@ const C = {
 
 const TAG: Record<string, { bg: string; fg: string; border: string }> = {
   headcount_expansion: { bg: C.green, fg: C.paper, border: C.green },
-  new_leader: { bg: C.terracotta, fg: C.ink, border: C.terracotta },
+  new_leader: { bg: C.blue, fg: C.paper, border: C.blue },
   workforce_digitalisation: { bg: C.sage, fg: C.ink, border: C.sage },
   funding: { bg: C.mauve, fg: C.ink, border: C.mauve },
   operational_challenge: { bg: C.paper, fg: C.ink, border: C.ink },
@@ -79,7 +79,7 @@ function tag(type: string | null) {
 
 function entryBlock(e: HotListEmailEntry, appUrl: string) {
   const bar = TAG[e.signal_type] ?? TAG.other_relevant;
-  const barText = e.signal_type === "headcount_expansion" ? C.paper : C.ink;
+  const barText = e.signal_type === "headcount_expansion" || e.signal_type === "new_leader" ? C.paper : C.ink;
   const stage = e.deal_stage ? DEAL_STAGE_LABELS[e.deal_stage] ?? e.deal_stage : "";
   return `
 <tr><td style="padding:0 0 20px 0;">
@@ -150,7 +150,7 @@ export function hotListEmailHtml(input: {
 <tr><td align="center" style="padding:24px 12px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:640px;background:${C.paper};border:1px solid ${C.line};">
     <tr><td style="padding:22px 24px;border-bottom:1px solid ${C.line};font:600 18px/1 ${FONT};color:${C.ink};">
-      <span style="color:${C.terracotta};letter-spacing:-1px;">((</span><span style="color:${C.green};">&#9679;</span><span style="color:${C.terracotta};letter-spacing:-1px;">))</span> ${esc(SITE.name)}
+      <span style="color:${C.blue};letter-spacing:-1px;">((</span><span style="color:${C.green};">&#9679;</span><span style="color:${C.blue};letter-spacing:-1px;">))</span> ${esc(SITE.name)}
     </td></tr>
     <tr><td style="padding:28px 24px 8px 24px;">
       <div style="font:600 30px/1.1 ${FONT};letter-spacing:-1px;color:${C.ink};margin:0 0 12px 0;">Hot List &middot; ${esc(emailDate(input.date))}</div>

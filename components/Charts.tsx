@@ -8,7 +8,7 @@ import { SIGNAL_LABELS, SIGNAL_TYPES, type SignalType } from "@/lib/taxonomy";
 // attributes can't read var(), so marks set colours through style={{ ... }}.
 export const TYPE_COLOR: Record<SignalType, string> = {
   headcount_expansion: "var(--green)",
-  new_leader: "var(--terracotta)",
+  new_leader: "var(--blue)",
   workforce_digitalisation: "var(--sage)",
   funding: "var(--mauve)",
   operational_challenge: "var(--ink)",
