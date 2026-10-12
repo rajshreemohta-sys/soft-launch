@@ -58,7 +58,7 @@ Reliability: each run stops starting new accounts after ~250 s (the route's limi
 1. Collects first for any account not checked in the last 6 hours.
 2. **Eligible:** accounts with at least one signal published in the last `HOT_LIST_WINDOW_DAYS` (3).
 3. Ranks eligible accounts by score; takes the top 10.
-4. **Gemini prompt B** writes a one-line summary (≤ 20 words) and an outreach angle (≤ 45 words) from the last 30 days of signals, tailored to the deal stage (prospect: a reason to talk; pilot: a reason to expand; customer: an upsell). Arjun's deal stage and notes are passed as **read-only** context.
+4. **Gemini prompt B** writes a short summary and outreach angle (about 10 words each, so the email reads as a two-line list) from the last 30 days of signals, tailored to the deal stage (prospect: a reason to talk; pilot: a reason to expand; customer: an upsell). Arjun's deal stage and notes are passed as **read-only** context.
 5. Clears old ranks and angles, sets new ones via RPC.
 6. Builds a table-based, inline-styled email and sends it with Resend, or saves it without sending when `DRY_RUN=true`. Every build is stored in `hotlists` and shown at `/hotlist/preview`.
 

@@ -103,8 +103,9 @@ Trigger events from the last 30 days, newest first:
 ${signals}
 
 Write:
-1. one_line_summary: at most 20 words. What changed and when (use the date, e.g. "on 9 Oct"). Lead with the newest event; mention an earlier one only if it forms a pattern.
-2. outreach_angle: at most 45 words. Connect the trigger, or the combined story across the events (e.g. funding, then a new HR head, then hiring), to ONE specific capability of the product, and fit the deal stage above. Write it as advice to Arjun ("Pitch...", "Offer...", "Ask..."). Plain and specific. No hype, no exclamation marks, no invented numbers, names or facts beyond the events and notes above.`;
+Both fields are read as one short line each in an email, so keep them tight.
+1. one_line_summary: at most 10 words. What changed, as a fragment that follows the company name (e.g. "reached 670 hotels after a wave of signings"). Do not repeat the company name; no date.
+2. outreach_angle: at most 10 words. ONE specific capability of the product tied to the trigger, fitting the deal stage above (a prospect gets a reason to talk, a pilot a reason to expand, a customer an upsell). Write it as a fragment starting with a lowercase verb (e.g. "extend the nurse-rostering pilot to the new hospital"); keep acronyms and proper nouns as normally written (F&B, IPO, CHRO). Plain and specific. No hype, no exclamation marks, no invented numbers, names or facts beyond the events and notes above.`;
 }
 
 export const outreachSchema = {
