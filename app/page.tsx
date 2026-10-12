@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { Gauge, HeatMeter, SignalsPerDay, StageTemperature, TriggersByType } from "@/components/Charts";
+import { Carousel } from "@/components/Carousel";
+import { Gauge, MiniGauge, SignalsPerDay, StageTemperature, TriggersByType, TYPE_COLOR } from "@/components/Charts";
 import { SignalArt } from "@/components/Logo";
 import { SignalTag, StageTag } from "@/components/Tag";
 import { getDashboard } from "@/lib/dashboard";
 import { DEAL_STAGE_LABELS } from "@/lib/format";
-import { HEAT_BANDS, heatIndex } from "@/lib/heat";
+import { HEAT_BANDS, heatBand, heatIndex } from "@/lib/heat";
+import type { SignalType } from "@/lib/taxonomy";
 import { HOT_LIST_WINDOW_DAYS, SITE } from "@/lib/site";
 
 export default function HotListPage() {
@@ -104,23 +106,29 @@ async function Dashboard() {
           <p className="muted small">Fresh trigger in the last {HOT_LIST_WINDOW_DAYS} days, ranked by signal score.</p>
         </div>
         {entries.length ? (
-          <ol className="leads">
-            {entries.map(({ rank, account, signal }) => (
-              <li key={account.id}>
-                <Link href={`/accounts/${account.id}`} className="lead-row">
-                  <span className="lead-rank">{String(rank).padStart(2, "0")}</span>
-                  <span className="lead-name">
-                    <strong>{account.company_name}</strong>
-                    <StageTag stage={account.deal_stage} />
+          <Carousel label="This week's Hot List">
+            {entries.map(({ rank, account, signal }) => {
+              const heat = heatIndex(Number(account.signal_score));
+              const band = heatBand(heat);
+              return (
+                <Link key={account.id} href={`/accounts/${account.id}`} className="hot-box">
+                  <span className="hot-strip" style={{ background: TYPE_COLOR[signal.signal_type as SignalType] }} aria-hidden="true" />
+                  <span className="hot-top">
+                    <span className="hot-rank">{String(rank).padStart(2, "0")}</span>
+                    <MiniGauge value={heat} />
                   </span>
-                  <HeatMeter value={heatIndex(Number(account.signal_score))} />
-                  <span className="lead-tag"><SignalTag type={signal.signal_type} /></span>
-                  <span className="lead-summary">{signal.summary}</span>
-                  <span className="lead-cta">Open analysis</span>
+                  <span className="hot-name">{account.company_name}</span>
+                  <span className="hot-pills">
+                    <StageTag stage={account.deal_stage} />
+                    <span className={`heat-chip heat-${band.toLowerCase()}`}>{band}</span>
+                  </span>
+                  <span className="hot-pills"><SignalTag type={signal.signal_type} /></span>
+                  <span className="hot-summary">{signal.summary}</span>
+                  <span className="hot-cta">Open analysis</span>
                 </Link>
-              </li>
-            ))}
-          </ol>
+              );
+            })}
+          </Carousel>
         ) : (
           <div className="empty">
             <strong>No fresh signals in the last {HOT_LIST_WINDOW_DAYS} days.</strong>

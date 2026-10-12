@@ -4,7 +4,7 @@ import { SIGNAL_LABELS, SIGNAL_TYPES, type SignalType } from "@/lib/taxonomy";
 // Server-rendered SVG charts in the dashboard palette. Identity is never colour alone:
 // every bar carries a text label, and each mark has a hover tooltip (<title>).
 
-const TYPE_COLOR: Record<SignalType, string> = {
+export const TYPE_COLOR: Record<SignalType, string> = {
   headcount_expansion: "#3D6549",
   new_leader: "#DE8C68",
   workforce_digitalisation: "#6E8761",
@@ -47,6 +47,27 @@ export function Gauge({ value, size = 180, label, sublabel }: { value: number; s
         {sublabel && <span className="gauge-sub">{sublabel}</span>}
       </figcaption>
     </figure>
+  );
+}
+
+// ---------------------------------------------------------------- mini gauge (no caption)
+
+export function MiniGauge({ value, size = 96 }: { value: number; size?: number }) {
+  const v = Math.max(0, Math.min(100, value));
+  const band = heatBand(v);
+  const r = size / 2 - 8;
+  const cx = size / 2;
+  const cy = size / 2 + 2;
+  const stroke = Math.max(8, size / 11);
+  const p = (a: number) => `${cx + r * Math.cos(a)} ${cy - r * Math.sin(a)}`;
+  const arc = (t: number) => `M ${p(Math.PI)} A ${r} ${r} 0 0 1 ${p(Math.PI * (1 - t / 100))}`;
+  return (
+    <svg width={size} viewBox={`0 0 ${size} ${size / 2 + 10}`} role="img" aria-label={`${band}, ${v} out of 100`}>
+      <title>{`${band}, ${v}/100`}</title>
+      <path d={arc(100)} fill="none" stroke={TRACK} strokeWidth={stroke} strokeLinecap="round" />
+      {v > 0 && <path d={arc(Math.max(v, 1.5))} fill="none" stroke={HEAT_COLORS[band]} strokeWidth={stroke} strokeLinecap="round" />}
+      <text x={cx} y={cy - 4} textAnchor="middle" className="gauge-value" fontSize={size / 4.2}>{v}</text>
+    </svg>
   );
 }
 

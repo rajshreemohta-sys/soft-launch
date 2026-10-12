@@ -107,7 +107,7 @@ On Vercel's free plan a cron can start anywhere within its hour.
 
 | Page | Shows |
 |---|---|
-| `/` | Hot/warm/cool/cold counts, gauges for the hottest leads, charts (triggers per day, triggers by type, pipeline temperature by deal stage), and the Hot List as a compact ranked table |
+| `/` | Hot/warm/cool/cold counts, gauges for the hottest leads, charts (triggers per day, triggers by type, pipeline temperature by deal stage), and the Hot List as a horizontal row of ranked boxes (scroll or use the arrows) |
 | `/accounts` | All 40 accounts in a sortable, filterable table with a temperature meter; quiet accounts greyed at the bottom |
 | `/accounts/[id]` | Full analysis (see below), with "Arjun's notes" in its own panel that the system never edits |
 | `/how-it-works` | Components Map, trigger taxonomy, scoring, protection, account analysis, limitations (linked in the footer) |

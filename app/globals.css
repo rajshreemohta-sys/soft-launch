@@ -1002,6 +1002,7 @@ h3.display {
 }
 
 .chart-card {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 20px;
@@ -1051,6 +1052,12 @@ h3.display {
   height: 14px;
   display: flex;
   gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.hbar-seg {
+  flex-shrink: 1;
 }
 
 .hbar-fill,
@@ -1091,59 +1098,127 @@ h3.display {
   margin-right: 6px;
 }
 
-/* ---------------- compact Hot List */
+/* ---------------- Hot List carousel */
 
-.leads {
-  list-style: none;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  overflow: hidden;
+.carousel {
   margin-top: 16px;
 }
 
-.leads li + li {
-  border-top: 1px solid var(--line);
-}
-
-.lead-row {
-  display: grid;
-  grid-template-columns: 44px minmax(150px, 1.1fr) 170px 190px minmax(0, 2fr) auto;
+.carousel-track {
+  display: flex;
   gap: 16px;
-  align-items: center;
-  padding: 14px 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding: 2px 2px 6px;
+  -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, #000 88%, transparent);
+}
+
+.carousel.at-end .carousel-track {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.round-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.round-btn:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.round-btn:disabled {
+  border-color: var(--line);
+  color: var(--line);
+  cursor: default;
+}
+
+.hot-box {
+  position: relative;
+  flex: 0 0 300px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px 20px 18px;
+  overflow: hidden;
   text-decoration: none;
+  background: var(--paper);
 }
 
-.lead-row:hover {
-  background: #faf9f6;
+.hot-box:hover {
+  border-color: var(--ink);
 }
 
-.lead-rank {
+.hot-strip {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 5px;
+}
+
+.hot-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.hot-rank {
   font-family: var(--display);
   font-weight: 500;
-  font-size: 26px;
-  letter-spacing: -0.04em;
+  font-size: 44px;
+  letter-spacing: -0.05em;
+  line-height: 1;
 }
 
-.lead-name {
-  display: grid;
+.hot-name {
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 1.25;
+}
+
+.hot-pills {
+  display: flex;
   gap: 6px;
-  justify-items: start;
+  flex-wrap: wrap;
 }
 
-.lead-summary {
+.hot-summary {
   font-size: 14px;
+  line-height: 1.45;
   color: var(--muted);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1;
 }
 
-.lead-cta {
+.hot-cta {
   font-size: 14px;
   text-decoration: underline;
-  white-space: nowrap;
 }
 
 /* ---------------- analysis page */
@@ -1383,9 +1458,6 @@ h3.display {
   .kpi:nth-child(n + 4) { border-top: 1px solid var(--line); }
   .gauges { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .analysis { grid-template-columns: 1fr; }
-  .lead-row { grid-template-columns: 40px minmax(0, 1fr) 160px; }
-  .lead-tag, .lead-summary { grid-column: 2 / -1; }
-  .lead-cta { display: none; }
 }
 
 @media (max-width: 600px) {
@@ -1394,12 +1466,11 @@ h3.display {
   .kpi:nth-child(-n + 2) { border-top: 0; }
   .kpi:nth-child(even) { border-left: 1px solid var(--line); }
   .kpi-value { font-size: 36px; }
-  .chart-grid { grid-template-columns: 1fr; }
+  .chart-grid { grid-template-columns: minmax(0, 1fr); }
   .chart-scroll .chart { min-width: 640px; }
+  .hot-box { flex-basis: 82%; }
   .hbars li { grid-template-columns: 110px minmax(0, 1fr) 24px; font-size: 13px; }
   .analysis-head { grid-template-columns: 1fr; }
   .head-gauge { justify-self: start; }
   .ai-cols, .facts-grid { grid-template-columns: 1fr; }
-  .lead-row { grid-template-columns: 34px minmax(0, 1fr); gap: 8px 12px; }
-  .lead-row .heat-meter { grid-column: 2; }
 }
