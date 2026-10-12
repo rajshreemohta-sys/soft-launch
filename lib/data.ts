@@ -148,3 +148,43 @@ export async function getHotList(): Promise<{
   }
   return { entries: ranking.slice(0, 10), saved: null, eligibleCount: ranking.length };
 }
+
+// ---------------------------------------------------------------- analysis data
+
+import type { CompanyProfile, Source } from "./profile";
+import type { Insight } from "./insights";
+
+export type ProfileRow = { profile: CompanyProfile; sources: Source[]; refreshed_at: string };
+export type InsightRow = { insight: Insight; based_on_signal_at: string | null; generated_at: string };
+
+export async function getProfile(accountId: string): Promise<ProfileRow | null> {
+  const { data, error } = await supabaseAdmin()
+    .from("company_profiles")
+    .select("profile, sources, refreshed_at")
+    .eq("account_id", accountId)
+    .maybeSingle();
+  if (error) throw error;
+  return data as ProfileRow | null;
+}
+
+export async function getInsight(accountId: string): Promise<InsightRow | null> {
+  const { data, error } = await supabaseAdmin()
+    .from("account_insights")
+    .select("insight, based_on_signal_at, generated_at")
+    .eq("account_id", accountId)
+    .maybeSingle();
+  if (error) throw error;
+  return data as InsightRow | null;
+}
+
+// Signals from the last N days (for dashboard charts).
+export async function getRecentSignals(days: number): Promise<Signal[]> {
+  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  const { data, error } = await supabaseAdmin()
+    .from("signals")
+    .select("*")
+    .gte("published_at", since)
+    .order("published_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Signal[];
+}

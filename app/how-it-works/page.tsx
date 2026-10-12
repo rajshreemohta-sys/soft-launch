@@ -113,12 +113,27 @@ account score = sum of signal values from the last ${LOOKBACK_DAYS} days
 
       <section className="section">
         <div className="prose">
+          <h2 className="display">5. Account analysis</h2>
+          <ul>
+            <li><strong>Lead temperature.</strong> Each account&rsquo;s score maps to a 0&ndash;100 meter: Hot, Warm, Cool or Cold.</li>
+            <li><strong>Company facts.</strong> Gemini Flash researches each company with Google Search (founding year, headquarters, listing, latest financials, annual report, senior leadership), then a second call extracts only what the search results say. Every profile keeps its sources. Profiles refresh every two weeks.</li>
+            <li><strong>Share price.</strong> Six months of NSE prices from Yahoo Finance for listed companies or their listed parent.</li>
+            <li><strong>What the AI says.</strong> Gemini Flash reads the triggers, the company facts and Arjun&rsquo;s notes (read-only) and writes the verdict, how to approach, talking points, risks and who to contact first, with an email and a LinkedIn note. It refreshes when a new trigger arrives.</li>
+            <li><strong>Nothing is sent automatically.</strong> Drafts open in Gmail or the mail app, or copy for LinkedIn; Arjun reviews and sends them himself. LinkedIn is linked by search, never scraped.</li>
+          </ul>
+        </div>
+      </section>
+      <div className="rule" />
+
+      <section className="section">
+        <div className="prose">
           <h2 className="display">Limitations</h2>
           <ul>
             <li>LinkedIn can&rsquo;t be reliably or legally scraped, so the system relies on news and press coverage, which reports the same big events.</li>
             <li>Google News RSS returns a limited, slightly varying set of results, so an event can be missed one day and caught the next.</li>
             <li>The Ken is read through its public headlines only; paywalled articles are never fetched.</li>
-            <li>Gemini can misjudge an article, so every signal links to its source.</li>
+            <li>Gemini can misjudge an article or a search result, so every signal and company profile links to its sources. Check leaders&rsquo; names before contacting anyone.</li>
+            <li>Private companies publish no balance sheet; their figures come from filings reported in the news.</li>
             <li>Google closed Gemini 2.5 Flash to new API keys, so the app runs on Gemini 3.8 Flash (set by one environment variable).</li>
             <li>Vercel&rsquo;s free plan runs scheduled jobs within the hour, and one run can check about 25 accounts in its time limit, so a second morning run finishes the rest.</li>
           </ul>

@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { HeatMeter } from "@/components/Charts";
 import { SignalTag, StageTag } from "@/components/Tag";
+import { heatIndex } from "@/lib/heat";
 import { DEAL_STAGE_LABELS, formatDate, formatScore } from "@/lib/format";
 import { SIGNAL_LABELS, SIGNAL_TYPES } from "@/lib/taxonomy";
 
@@ -25,7 +27,7 @@ const COLUMNS: { key: SortKey | null; label: string; num?: boolean }[] = [
   { key: "company", label: "Company" },
   { key: "sector", label: "Sector" },
   { key: "stage", label: "Deal stage" },
-  { key: "score", label: "Score", num: true },
+  { key: "score", label: "Temperature" },
   { key: null, label: "Latest signal" },
   { key: "signalDate", label: "Last signal" },
   { key: "lastContact", label: "Last contact" },
@@ -114,7 +116,7 @@ export function AccountsTable({ rows }: { rows: AccountRow[] }) {
                 </td>
                 <td className="wrap">{r.sector}</td>
                 <td><StageTag stage={r.stage} /></td>
-                <td className="num">{formatScore(r.score)}</td>
+                <td><HeatMeter value={heatIndex(r.score)} /> <span className="small muted">({formatScore(r.score)})</span></td>
                 <td>{r.score > 0 ? <SignalTag type={r.signalType} /> : <span>Quiet</span>}</td>
                 <td>{formatDate(r.signalDate)}</td>
                 <td>{formatDate(r.lastContact)}</td>

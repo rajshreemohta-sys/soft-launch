@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Inter_Tight } from "next/font/google";
+import Link from "next/link";
 import { Header } from "@/components/Header";
 import { SITE } from "@/lib/site";
 import "./globals.css";
@@ -29,7 +30,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="rule" />
           <footer className="site-footer">
             <span>{SITE.disclaimer}</span>
-            <span>News from Google News and The Ken headlines. AI by Gemini Flash.</span>
+            <nav className="footer-links" aria-label="More">
+              <Link href="/how-it-works">How it works</Link>
+              <Link href="/hotlist/preview">Email preview</Link>
+            </nav>
           </footer>
         </div>
       </body>

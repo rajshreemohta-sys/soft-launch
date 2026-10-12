@@ -7,8 +7,6 @@ import { Suspense } from "react";
 const LINKS = [
   { href: "/", label: "Hot List" },
   { href: "/accounts", label: "Accounts" },
-  { href: "/how-it-works", label: "How it works" },
-  { href: "/hotlist/preview", label: "Email preview" },
 ];
 
 // The active link depends on the URL, which is only known at request time on dynamic

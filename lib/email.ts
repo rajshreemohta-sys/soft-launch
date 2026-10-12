@@ -150,7 +150,7 @@ export function hotListEmailHtml(input: {
 <tr><td align="center" style="padding:24px 12px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:640px;background:${C.paper};border:1px solid ${C.line};">
     <tr><td style="padding:22px 24px;border-bottom:1px solid ${C.line};font:600 18px/1 ${FONT};color:${C.ink};">
-      <span style="color:${C.terracotta};">&#9698;</span> ${esc(SITE.name)}
+      <span style="color:${C.terracotta};letter-spacing:-1px;">((</span><span style="color:${C.green};">&#9679;</span><span style="color:${C.terracotta};letter-spacing:-1px;">))</span> ${esc(SITE.name)}
     </td></tr>
     <tr><td style="padding:28px 24px 8px 24px;">
       <div style="font:13px/1.4 ${FONT};color:${C.muted};margin:0 0 6px 0;">Hot List &middot; ${esc(emailDate(input.date))}</div>

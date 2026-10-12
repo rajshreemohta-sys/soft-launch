@@ -14,7 +14,7 @@ Signal Desk:
 3. Scores every account so fresh signals rise and quiet accounts fall on their own.
 4. Writes results to **Supabase**, touching only system columns. Arjun's columns are protected in the database itself.
 5. Every **Monday and Thursday morning (IST)** emails Arjun a Hot List: the top 10 accounts with signals from the last 3 days, each with a one-line summary and a Gemini-drafted outreach angle.
-6. Shows everything on a dashboard deployed on **Vercel**.
+6. Shows everything on a dashboard deployed on **Vercel**: lead-temperature meters, charts, and a full analysis page per company (founding year, the trigger, financials with the annual report, live share price, recent news, the AI's read on how to approach the lead, senior leadership, and ready-to-send email and LinkedIn drafts).
 
 ## Requirements checklist
 
@@ -48,11 +48,18 @@ flowchart TB
     cron2["Vercel Cron / button"] --> hotRoute["/api/cron/hotlist"] --> gem2["Gemini Flash<br/>summary + outreach angle"] --> resend["Resend"] --> inbox(["Arjun's inbox"])
   end
 
+  subgraph analysis["4 · Account analysis"]
+    direction LR
+    research["Gemini Flash + Google Search<br/>company facts, financials, leaders"] ~~~ insight["Gemini Flash<br/>lead read + email and LinkedIn drafts"] ~~~ yahoo["Yahoo Finance<br/>share price"]
+  end
+
   dash["Dashboard on Vercel<br/>reads Supabase server-side"]
 
   collect -- "signals, seen articles,<br/>scores via RPC" --> db
   db -- "top 10 eligible accounts;<br/>angles saved via RPC" --> hot
+  analysis -- "profiles, insights" --> db
   db --> dash
+  analysis --> dash
 ```
 
 (Source of truth: `lib/componentsMap.ts`, which also renders on `/how-it-works`.)
@@ -100,11 +107,24 @@ On Vercel's free plan a cron can start anywhere within its hour.
 
 | Page | Shows |
 |---|---|
-| `/` | The Hot List as ranked cards (browser-window style), run status, buttons to run collection or send the Hot List now |
-| `/accounts` | All 40 accounts in a sortable, filterable table; quiet accounts greyed at the bottom |
-| `/accounts/[id]` | "Arjun's notes" (never edited by the system) beside "What the system found" (score, outreach angle, signal timeline with sources) |
-| `/how-it-works` | Components Map, trigger taxonomy, scoring, protection, limitations |
-| `/hotlist/preview` | The latest email as sent (or as built in dry-run mode) |
+| `/` | Hot/warm/cool/cold counts, gauges for the hottest leads, charts (triggers per day, triggers by type, pipeline temperature by deal stage), and the Hot List as a compact ranked table |
+| `/accounts` | All 40 accounts in a sortable, filterable table with a temperature meter; quiet accounts greyed at the bottom |
+| `/accounts/[id]` | Full analysis (see below), with "Arjun's notes" in its own panel that the system never edits |
+| `/how-it-works` | Components Map, trigger taxonomy, scoring, protection, account analysis, limitations (linked in the footer) |
+| `/hotlist/preview` | The latest email as sent (or as built in dry-run mode) (linked in the footer) |
+
+### Account analysis
+
+Each account page (`app/accounts/[id]/page.tsx`) is a full brief on the company:
+
+- **Lead temperature** (`lib/heat.ts`): the score mapped to 0–100 with diminishing returns (`100 × (1 − e^(−score/12))`), banded Hot ≥ 65, Warm ≥ 35, Cool > 0, Cold. Shown as gauges and meters in one hue, light to dark.
+- **Company facts** (`lib/profile.ts`): Gemini Flash with **Google Search grounding** researches founding year, headquarters, listing and NSE symbol (or the listed parent's), latest financials, the annual report, and senior leadership. A second Gemini call extracts structured facts *only* from those notes. Grounding sources are resolved to real URLs and stored with the profile; the newest annual-report PDF among them is linked. Refreshed every 14 days, using spare time after the morning collect.
+- **Share price** (`lib/live.ts`): six months of NSE closes from Yahoo Finance, cached for an hour.
+- **Recent news**: the last 14 days from the same Google News search, cached for an hour.
+- **What the AI says** (`lib/insights.ts`): Gemini Flash writes a verdict, why now, three approach steps, talking points, risks, the best first contact, an email (under 130 words) and a LinkedIn note (under 280 characters). Arjun's stage and notes are read-only context. Regenerated when a newer signal arrives or after a week.
+- **Drafts are never sent automatically.** They are editable on the page and open in Gmail or the mail app, or copy for LinkedIn (leaders are linked by LinkedIn search, never scraped).
+
+Run `npm run enrich` to research every company and write insights (`-- --force Zepto` to redo one).
 
 ### Access model
 
@@ -118,13 +138,14 @@ The dashboard and both run buttons are open to anyone with the link, so a review
 
 ## Database
 
-Tables (`supabase/migrations/001_init.sql` to `004_hotlists.sql`):
+Tables (`supabase/migrations/001_init.sql` to `005_profiles_and_insights.sql`):
 
 - **`accounts`**: one row per account, with columns split by owner. *Setup:* `company_name`, `search_terms`, `sector`. *Arjun's:* `deal_stage`, `arjun_notes`, `last_contact_date`, `relationship_read`. *System:* `signal_score`, `latest_signal_*`, `outreach_angle`, `hot_rank`, `last_checked_at`.
 - **`signals`**: one row per real trigger event, unique per account and source URL.
 - **`seen_articles`**: every article already sent to Gemini, per account (one article can matter to two accounts, e.g. "Blinkit beats Zepto").
 - **`pipeline_runs`**: run log for the dashboard and debugging.
 - **`hotlists`**: every Hot List build with its email HTML and entries.
+- **`company_profiles`** and **`account_insights`**: researched company facts with sources, and Gemini's read and drafts (`005_profiles_and_insights.sql`).
 
 ### How Arjun's columns are protected
 
@@ -174,7 +195,7 @@ account score = sum of signal values from the last 30 days
    cd soft-launch
    npm install
    ```
-2. **Supabase:** create a project, then in the SQL editor run `supabase/migrations/001_init.sql` to `004_hotlists.sql` in order, then `seed/seed.sql`. (`seed/seed.sql` is generated from `seed/accounts.json` by `node seed/build-seed-sql.mjs`.)
+2. **Supabase:** create a project, then in the SQL editor run `supabase/migrations/001_init.sql` to `005_profiles_and_insights.sql` in order, then `seed/seed.sql`. (`seed/seed.sql` is generated from `seed/accounts.json` by `node seed/build-seed-sql.mjs`.)
 3. **Gemini:** create an API key in Google AI Studio.
 4. **Resend:** create an account and an API key. With the test sender, the email only reaches the Resend account owner.
 5. **Environment:** copy `.env.example` to `.env.local` and fill it in; add the same variables in Vercel → Settings → Environment Variables (secrets as *Secret*).
@@ -207,6 +228,7 @@ npm run collect             # collect all accounts (or: npm run collect -- Zepto
 npm run hotlist             # build and send the Hot List (add -- --dry-run to only build)
 npm run rescore             # rescore every account without fetching news
 npm run news:coverage       # count recent articles per company, to spot accounts with thin news
+npm run enrich              # research company profiles and write AI insights (missing or stale only)
 ```
 
 ## Limitations
@@ -214,7 +236,9 @@ npm run news:coverage       # count recent articles per company, to spot account
 - **No LinkedIn.** LinkedIn posts can't be reliably or legally scraped, so the system relies on news and press coverage, which reports the same major events (new leaders, funding, expansion).
 - **Google News RSS returns a limited, slightly varying set of results per query,** so an event can be missed on one run and caught on the next.
 - **The Ken is read through its public headlines only** (via Google News); paywalled articles are never fetched. Its own RSS feed has only ten items and no summaries.
-- **Gemini can misjudge an article,** so every signal links to its source and shows Gemini's reasoning.
+- **Gemini can misjudge an article or a search result,** so every signal links to its source and shows Gemini's reasoning, and every company profile lists its research sources. Check a leader's name and title before contacting them.
+- **Private companies publish no balance sheet;** their figures come from regulatory filings reported in the news, and some are not disclosed.
+- **Share prices come from Yahoo Finance's public chart endpoint,** which is unofficial and can change; the page shows "price unavailable" if it fails.
 - **Gemini version:** Google closed `gemini-2.5-flash` to new API keys ("no longer available to new users"), so the app uses `gemini-3.8-flash`. The model is one environment variable.
 - **Vercel free plan:** crons run once a day each and can start anywhere within their hour; a function run is capped at 300 s, which covers about 25 accounts, hence the second morning collect run.
 - **Resend free plan:** with the test sender, the Hot List can only be delivered to the Resend account owner's inbox, so it goes to the student's address standing in for Arjun's. A verified domain removes this limit.

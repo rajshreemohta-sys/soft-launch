@@ -66,3 +66,15 @@ test("a much stronger fresh signal can still beat a weak old pattern", () => {
 test("future-dated articles are treated as age 0, not as a bonus", () => {
   assert.equal(signalValue(sig("operational_challenge", 5, -2), NOW), 5);
 });
+
+import { heatBand, heatIndex } from "../lib/heat";
+
+test("heat: score maps to 0-100 with bands, quiet accounts are cold", () => {
+  assert.equal(heatIndex(0), 0);
+  assert.equal(heatBand(heatIndex(0)), "Cold");
+  assert.equal(heatBand(heatIndex(3)), "Cool");
+  assert.equal(heatBand(heatIndex(8)), "Warm");
+  assert.equal(heatBand(heatIndex(25)), "Hot");
+  assert.ok(heatIndex(1000) <= 100);
+  assert.ok(heatIndex(20) > heatIndex(10));
+});

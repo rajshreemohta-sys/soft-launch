@@ -16,8 +16,15 @@ export const COMPONENTS_MAP = `flowchart TB
     cron2["Vercel Cron / button"] --> hotRoute["/api/cron/hotlist"] --> gem2["Gemini Flash<br/>summary + outreach angle"] --> resend["Resend"] --> inbox(["Arjun's inbox"])
   end
 
+  subgraph analysis["4 · Account analysis"]
+    direction LR
+    research["Gemini Flash + Google Search<br/>company facts, financials, leaders"] ~~~ insight["Gemini Flash<br/>lead read + email and LinkedIn drafts"] ~~~ yahoo["Yahoo Finance<br/>share price"]
+  end
+
   dash["Dashboard on Vercel<br/>reads Supabase server-side"]
 
   collect -- "signals, seen articles,<br/>scores via RPC" --> db
   db -- "top 10 eligible accounts;<br/>angles saved via RPC" --> hot
-  db --> dash`;
+  analysis -- "profiles, insights" --> db
+  db --> dash
+  analysis --> dash`;
