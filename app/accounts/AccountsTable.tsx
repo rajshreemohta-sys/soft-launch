@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { HeatMeter } from "@/components/Charts";
 import { SignalTag, StageTag } from "@/components/Tag";
-import { heatIndex } from "@/lib/heat";
+import { heatBand, heatIndex, HEAT_BANDS } from "@/lib/heat";
 import { DEAL_STAGE_LABELS, formatDate, shortRevenue } from "@/lib/format";
 import { SIGNAL_LABELS, SIGNAL_TYPES } from "@/lib/taxonomy";
 
@@ -38,12 +38,16 @@ const COLUMNS: { key: SortKey | null; label: string; num?: boolean }[] = [
 // Quiet accounts are ordered by how far along the deal is: they matter most there.
 const STAGE_ORDER: Record<string, number> = { pilot: 0, customer_expansion: 1, in_conversation: 2, outreach: 3 };
 
-export function AccountsTable({ rows }: { rows: AccountRow[] }) {
+export function AccountsTable({ rows, initialTemp = "all", initialSort = "score" }: { rows: AccountRow[]; initialTemp?: string; initialSort?: "score" | "recent" }) {
   const [stage, setStage] = useState("all");
   const [type, setType] = useState("all");
-  const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "score", dir: -1 });
+  const [temp, setTemp] = useState(initialTemp);
+  const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>(
+    initialSort === "recent" ? { key: "signalDate", dir: -1 } : { key: "score", dir: -1 }
+  );
 
-  const stageOk = (r: AccountRow) => stage === "all" || r.stage === stage;
+  const tempOk = (r: AccountRow) => temp === "all" || heatBand(heatIndex(r.score)).toLowerCase() === temp;
+  const stageOk = (r: AccountRow) => (stage === "all" || r.stage === stage) && tempOk(r);
 
   const active = useMemo(() => {
     const value = (r: AccountRow) => r[sort.key] ?? "";
@@ -56,7 +60,7 @@ export function AccountsTable({ rows }: { rows: AccountRow[] }) {
         return cmp * sort.dir || a.company.localeCompare(b.company);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows, stage, type, sort]);
+  }, [rows, stage, type, temp, sort]);
 
   const quiet = useMemo(
     () =>
@@ -66,7 +70,7 @@ export function AccountsTable({ rows }: { rows: AccountRow[] }) {
             .filter((r) => r.score <= 0 && stageOk(r))
             .sort((a, b) => (STAGE_ORDER[a.stage ?? ""] ?? 9) - (STAGE_ORDER[b.stage ?? ""] ?? 9) || a.company.localeCompare(b.company)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rows, stage, type]
+    [rows, stage, type, temp]
   );
 
   const toggle = (key: SortKey) =>
@@ -85,6 +89,15 @@ export function AccountsTable({ rows }: { rows: AccountRow[] }) {
           </select>
         </label>
         <label>
+          Temperature
+          <select value={temp} onChange={(e) => setTemp(e.target.value)}>
+            <option value="all">All temperatures</option>
+            {HEAT_BANDS.map((b) => (
+              <option key={b} value={b.toLowerCase()}>{b}</option>
+            ))}
+          </select>
+        </label>
+        <label>
           Latest trigger
           <select value={type} onChange={(e) => setType(e.target.value)}>
             <option value="all">All types</option>
@@ -98,6 +111,7 @@ export function AccountsTable({ rows }: { rows: AccountRow[] }) {
         </span>
       </div>
 
+      {temp !== "cold" && (
       <div className="table-scroll" tabIndex={0} role="region" aria-label="Active accounts">
         <table className="table">
           <thead>
@@ -129,9 +143,11 @@ export function AccountsTable({ rows }: { rows: AccountRow[] }) {
                 </td>
                 <td><StageTag stage={r.stage} /></td>
                 <td><HeatMeter value={heatIndex(r.score)} /></td>
-                <td className="wrap trigger-cell">
-                  <SignalTag type={r.signalType} />
-                  {r.signalSummary && <span className="small muted">{r.signalSummary}</span>}
+                <td className="wrap">
+                  <div className="trigger-cell">
+                    <SignalTag type={r.signalType} />
+                    {r.signalSummary && <span className="small muted">{r.signalSummary}</span>}
+                  </div>
                 </td>
                 <td>{formatDate(r.signalDate)}</td>
                 <td>{formatDate(r.lastContact)}</td>
@@ -145,6 +161,7 @@ export function AccountsTable({ rows }: { rows: AccountRow[] }) {
           </tbody>
         </table>
       </div>
+      )}
 
       {quiet.length > 0 && (
         <section className="quiet" aria-labelledby="quiet-h">

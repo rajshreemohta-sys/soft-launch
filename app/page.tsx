@@ -28,25 +28,28 @@ async function Dashboard() {
   return (
     <>
       <section className="section section-tight section-first">
-        <div className="kpis">
+        <nav className="kpis" aria-label="Lead summary">
           {HEAT_BANDS.map((b) => (
-            <div key={b} className="kpi">
+            <Link key={b} href={`/accounts?temp=${b.toLowerCase()}`} className={`kpi kpi-${b.toLowerCase()}`}>
               <span className="kpi-label">
                 <span className={`heat-dot heat-${b.toLowerCase()}`} aria-hidden="true" />
                 {b} leads
               </span>
               <span className="kpi-value">{bandCounts[b]}</span>
-            </div>
+              <span className="kpi-link">View accounts</span>
+            </Link>
           ))}
-          <div className="kpi">
+          <Link href="/accounts?sort=recent" className="kpi">
             <span className="kpi-label">New triggers, last 7 days</span>
             <span className="kpi-value">{newThisWeek}</span>
-          </div>
-          <div className="kpi">
+            <span className="kpi-link">Latest first</span>
+          </Link>
+          <Link href="/hotlist/preview" className="kpi">
             <span className="kpi-label">Next Hot List email</span>
             <span className="kpi-value kpi-small">{nextHotList}</span>
-          </div>
-        </div>
+            <span className="kpi-link">See the last one</span>
+          </Link>
+        </nav>
       </section>
       <div className="rule" />
 

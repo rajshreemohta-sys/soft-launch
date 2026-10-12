@@ -6,7 +6,7 @@ import { AccountsTable, type AccountRow } from "./AccountsTable";
 
 export const metadata: Metadata = { title: "Accounts" };
 
-export default function AccountsPage() {
+export default function AccountsPage({ searchParams }: PageProps<"/accounts">) {
   return (
     <>
       <section className="page-head">
@@ -16,15 +16,18 @@ export default function AccountsPage() {
       <div className="rule" />
       <section className="section">
         <Suspense fallback={<p className="muted">Loading accounts…</p>}>
-          <Accounts />
+          <Accounts searchParams={searchParams} />
         </Suspense>
       </section>
     </>
   );
 }
 
-async function Accounts() {
+async function Accounts({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await connection();
+  const params = await searchParams;
+  const temp = typeof params.temp === "string" && ["hot", "warm", "cool", "cold"].includes(params.temp) ? params.temp : "all";
+  const sort = params.sort === "recent" ? "recent" : "score";
   const [accounts, profiles] = await Promise.all([getAccounts(), getProfileSummaries()]);
   let rank = 0;
   const rows: AccountRow[] = accounts.map((a) => ({
@@ -41,5 +44,5 @@ async function Accounts() {
     revenue: profiles.get(a.id)?.revenue ?? null,
     leader: profiles.get(a.id)?.leader ?? null,
   }));
-  return <AccountsTable rows={rows} />;
+  return <AccountsTable key={`${temp}-${sort}`} rows={rows} initialTemp={temp} initialSort={sort} />;
 }

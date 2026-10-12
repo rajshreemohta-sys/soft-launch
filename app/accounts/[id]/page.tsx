@@ -262,7 +262,11 @@ function CompanyTab({ profile, sources, company, refreshedAt }: { profile: Compa
           </dl>
           {f.note && <p className="small muted" style={{ marginTop: 10 }}>{f.note}</p>}
           {report ? (
-            <a className="btn btn-sm btn-ghost" style={{ marginTop: 14 }} href={report.url} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-sm btn-primary report-btn" href={report.url} target="_blank" rel="noopener noreferrer">
+              <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M4 1.5h5.5L13 5v9.5H4z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+                <path d="M9.5 1.5V5H13M6 8.5h5M6 11h5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
               {/\.pdf/i.test(report.url) ? "Annual report (PDF)" : "Investor relations"}
             </a>
           ) : (
