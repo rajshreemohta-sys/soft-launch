@@ -63,7 +63,7 @@ Trigger events from the last 30 days, newest first:
 ${sig}
 
 Write, using only the facts above (never invent numbers, names, customers or events):
-- verdict: 2 sentences. How hot this lead is right now and the single reason.
+- verdict: 2 sentences. Start with the lead temperature word given above (Hot, Warm, Cool or Cold) and do not contradict it; it measures fresh news, not the relationship. Then give the single biggest reason to act now, or, if there are no recent triggers, what would make it worth contacting anyway (e.g. an active deal stage).
 - why_now: 1 sentence naming the specific trigger(s) that make this the moment.
 - approach: 3 short steps, in order, for how Arjun should approach this account given the deal stage.
 - talking_points: 3 points tying the triggers to specific ${PRODUCT.name} capabilities.
