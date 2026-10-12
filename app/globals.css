@@ -20,7 +20,7 @@
   --heat-cold: #efede8;
   --heat-hot-text: #ffffff;
   --heat-track: #efede8;
-  --art-terracotta: #d48c6c;
+  --art-accent: var(--blue);
   --art-cream: #efebe1;
   --neon: transparent;
   --glow: none;
